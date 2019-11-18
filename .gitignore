@@ -1,8 +1,8 @@
 *~
 *.swp
 image1/
-#anatomogram/src/svg/svg_trans/*.R
-#anatomogram/src/svg/svg_trans/*.txt
+anatomogram/src/svg/svg_trans/*.R
+anatomogram/src/svg/svg_trans/*.txt
 anatomogram/.*
 anatomogram/html/
 anatomogram/__mocks__/
@@ -12,7 +12,9 @@ anatomogram/README.md
 anatomogram/scripts/
 anatomogram/__test__/
 anatomogram/w*
-
-
-
+anatomogram/src/svg/*.svg
+anatomogram/src/svg/*.md
+anatomogram/src/img
+anatomogram/src/json
+anatomogram/src/*.js
 
