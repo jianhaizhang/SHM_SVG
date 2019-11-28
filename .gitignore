@@ -1,6 +1,5 @@
 *~
 *.swp
-image1/
 anatomogram/src/svg/svg_trans/*.R
 anatomogram/src/svg/svg_trans/*.txt
 anatomogram/.*
