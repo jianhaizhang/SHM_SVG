@@ -32,7 +32,7 @@ library(knitr); opts_chunk$set(message=FALSE, warning=FALSE)
 
 # Summary
 
-The R/Bioconductor package spatialHeatmap is designed for intuitive visualisation of large-scale data as long as a pair of configured data matrix and SVG image are provided. This tutorial is specifically devised for how to make an SVG image and configure it with the data matrix step by step. 
+The R/Bioconductor package spatialHeatmap is designed for intuitive visualisation of large-scale data as long as a pair of configured data matrix and SVG image are provided. This tutorial is specifically devised for how to make an SVG image and configure it with the data matrix step by step. The vignette of the package is available [here](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
 
 To make a custom SVG image, a png image where regions should have clear contours, a data matrix, the SVG editor [Inkscape](https://inkscape.org/), and optionally the image editor [GIMP](https://www.gimp.org/) are required. The png image is the template while the data matrix is used to colour different regions in the SVG image. Inkscape is used to associate the SVG image with the data matrix and GIMP is optionally used to automatically extract polygons for the SVG image. 
 
