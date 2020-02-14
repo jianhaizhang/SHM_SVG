@@ -32,29 +32,29 @@ library(knitr); opts_chunk$set(message=FALSE, warning=FALSE)
 
 # Summary
 
-The R/Bioconductor package spatialHeatmap is designed for intuitive visualisation of large-scale data as long as a pair of configured data matrix and SVG image are provided. This tutorial is specifically devised for how to make an SVG image and configure it with the data matrix step by step. The vignette of the package is available [here](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
+The R/Bioconductor package spatialHeatmap is designed for intuitive visualisation of configured data matrix and SVG image provided by users. This tutorial is specifically devised for how to make an SVG image and configure it with the data matrix step by step, which is given with *Aribidopsis thaliana* root tissues as an example. For the usage of this package, refer to the [vignette](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
 
-To make a custom SVG image, a png image where regions should have clear contours, a data matrix, the SVG editor [Inkscape](https://inkscape.org/), and optionally the image editor [GIMP](https://www.gimp.org/) are required. The png image is the template while the data matrix is used to colour different regions in the SVG image. Inkscape is used to associate the SVG image with the data matrix and GIMP is optionally used to automatically extract polygons for the SVG image. 
+To make a custom SVG image, a png image where regions should have clear contours, a data matrix, the SVG editor [Inkscape](https://inkscape.org/) are required. The image editor [GIMP](https://www.gimp.org/) is optional. Inkscape is used to draw the SVG image with the PNG image as a template, and configure the SVG image with the data matrix. The data matrix is used to colour different regions in the SVG image. GIMP could be used to automatically extract polygons for the SVG image depending on the quality of the PNG template. 
 
-In the following, the tutorial is given with a pair of configured gene expression matrix and SVG image of root tissues. All the files used in this tutorial can be downloaded [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (download an SVG image: hover over the image, right click, and select "Save image as..."; download a PNG image: click the image, click "Download", right click, and select "Save image as..."; download a TXT file: click the file, click "Raw", right click, and select "Save as...".).
+To reproduce the results in this tutorial, users can download all the relavant files [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (download an SVG image: hover over the image, right click, and select "Save image as..."; download a PNG image: click the image, click "Download", right click, and select "Save image as..."; download a TXT file: click the file, click "Raw", right click, and select "Save as...".).
 
 # Procedure
 
 ```{r, eval=TRUE, echo=FALSE, warnings=FALSE}
 
-url <- "https://raw.githubusercontent.com/jianhaizhang/SVG_tutorial_file/master/image/"
+  url <- "https://raw.githubusercontent.com/jianhaizhang/SVG_tutorial_file/master/image/"
 
 ```
-## Gene Expression Matrix
+## Format Gene Expression Matrix
 
-The gene expression matrix should be normalised and filtered before downstream processing. In this tutorial the normalisation process is not covered. The function `filter_data` [@SummarizedExperiment; @data.table; @utils] has two filter arguments `pOA` and `CV`, corresponding to `pOverA` and `cv` in the package "genefilter" [@Gentleman2018-xj], respectively.   
+As a convention, the gene expression matrix should be normalised and filtered before downstream processing. The expression matrix ([Table 1](#table), @Geng2013-ek) used in this tutorial is already normalised, so normalisation is not covered. The function `filter_data` [@SummarizedExperiment; @data.table; @utils] is designed to filter expression matrix, which builds on `pOverA` and `cv` in the package "genefilter" [@Gentleman2018-xj].   
 
 <a name="name_format"></a>
-To plot the spatial heatmaps, the data matrix must be formatted in the following way:
+To use the spatialHeatmap, the data matrix must be formatted in the following way:
 
 1. The row and column names should be gene IDs and sample/conditions respectively. 
 
-2. In sample/condition names, a sample name is followed by double underscore then the condition, such as “epidermis__140mM_1h" in [Table 1](#table) [@Geng2013-ek], where "epidermis" is the sample and "140mM_1h" is the condition. 
+2. In sample/condition names, a sample name is followed by double underscore "__" then the condition. E.g In "epidermis__140mM_1h" shown in [Table 1](#table), "epidermis" is the sample and "140mM_1h" is the condition. 
 
 3. In the column names of sample/condition, only letters, digits, single underscore, single space, or dots are allowed. 
 
@@ -62,7 +62,7 @@ To plot the spatial heatmaps, the data matrix must be formatted in the following
  
 Not all samples in the matrix need to be present in the SVG image, vice versa. Only samples common between the SVG image and data matrix are recognised and coloured. Even a dot, space, underscore, uppercase, or lowercase matters.
 
-The expression matrix is stored as an "SummarizedExperiment" object. Metadata of genes and sample/conditions can be optionally added. Refer to the R package "SummarizedExperiment" for more details [@SummarizedExperiment].
+The expression matrix is stored as an "SummarizedExperiment" object [@SummarizedExperiment].
 
 ```{r, filter, eval=TRUE, echo=TRUE, warnings=FALSE }
 
@@ -83,13 +83,14 @@ The expression matrix is stored as an "SummarizedExperiment" object. Metadata of
   ## The expression matrix, gene annotation, and condition are stored in a "SummarizedExperiment" object. Gene annotation and condition are optional.
   expr <- SummarizedExperiment(assays=list(expr=expr), rowData=ann, colData=con)
 
-  # Filter genes. In "pOA", genes with expression value A >= 1 in at least p=0.03 (3%) of all samples are retained; in "CV", genes with coefficient of variance (cv) between 0.1 and 10000 are retained, where the upper limit is set to very high (10000) so as to keep all genes with cv over 0.1. 
-  exp <- filter_data(data=expr, pOA=c(1, 0.03), CV=c(0.1, 10000), dir=NULL)
+  # Filter genes. In "pOA", genes with expression value A >= 1 in at least p=0.03 (3%) of all samples are retained; in "CV", genes with coefficient of variance (cv) between 0.1 and 100 are retained. 
+  exp <- filter_data(data=expr, pOA=c(1, 0.03), CV=c(0.1, 100), dir=NULL)
 
   # Get the filtered matrix. "filter_data" returns a "SummarizedExperiment" object.
   df <- assay(exp)
 
 ```
+
 <a name="table"></a>
 ```{r, table, eval=TRUE, echo=FALSE, warnings=FALSE}
 
@@ -101,10 +102,10 @@ The expression matrix is stored as an "SummarizedExperiment" object. Metadata of
 
 ### <a name="draw"></a> Make Blank SVG Images by Drawing 
 
-If the contour in the png image is not clear, GIMP can generate low-quality SVG images, so in this case one can draw the blank SVG image with Inkscape by using the png as a template. Below is an example of drawing only two polygons.
+If the contour in the PNG image is not clear, GIMP would generate low-quality SVG images, so in this case one can draw the blank SVG image with Inkscape by using the PNG as a template. Below is an example of drawing only two polygons.
 
   1. Draw polygons <p/><p/> 
-  Open the root png image [@Mustroph2009-nu] in Inkscape. The image can be zoomed by press "-" or "+" on the keyboard. Select the "Draw freeahnd lines (F6)" at the left tool bar. Left click once at the first corner of the polygon, move to the second corner and double left click, and so on. Lastly, when drawing the last line click at the first corner to seal the polygon.
+  Open the root PNG image [@Mustroph2009-nu] in Inkscape. The image can be zoomed by press "-" or "+" on the keyboard. Select the "Draw freeahnd lines (F6)" at the left tool bar. Left click once at the first corner of the polygon, move to the second corner and double left click, and so on. Lastly, when drawing the last line click at the first corner to seal the polygon.
   <p/><center><img src="`r paste0(url, "open.png")`" width="100" hspace=20><img src="`r paste0(url, "draw_freehand_line.png")`" hspace=20>)<img src="`r paste0(url, "double_click.png")`"><img src="`r paste0(url, "draw_second_line.png")`"><img src="`r paste0(url, "draw_last_line.png")`"></center><p/>
 
   2. Align polygons <p/><p/> 
@@ -143,7 +144,7 @@ If the png image contains many polygons and their contours are clear (e.g. the r
 
 The drawing method creates accurate SVG images but it is time-consuming, while the GIMP method is faster but it can generate fused polygons. In this tutorial, the root png image has well-separated polygons and clear contours, so GIMP can produce accurate SVG images. Otherwise the resulting SVG images would have mixed and noise polygons. Considering the pros and cons of two methods, the good practice is to first use GIMP to extract polygons then use drawing method to refine them. Below is an example of an SVG image with fused polygons, which is generated by GIMP.
 
-  7. <a name="layer"></a> Place all SVG paths inside a layer <p/><p/>
+  7. <a name="layer"></a> Place all SVG paths inside a layer/group <p/><p/>
   Open the blank fused SVG image in Inkscape (the image can be zoomed by press "-" or "+" on the keyboard). Under the "Layers" tab at the top click "Layers", the "Layers" panel will come out on the right, then click "+" at the bottom left corner of the panel to add "Layer 1". 
   <p/><center><img src="`r paste0(url, "layer1.png")`" hspace=10><img src="`r paste0(url, "layer2.png")`" hspace=10><img src="`r paste0(url, "add_layer.png")`"></center><p/>
 
@@ -156,7 +157,7 @@ The drawing method creates accurate SVG images but it is time-consuming, while t
 
   <center><img src="`r paste0(url, "break_apart1.png")`" hspace="15"><img src="`r paste0(url, "remove_outer_frame.png")`" hspace="15"></center> <p/> 
 
-    Click the edge of the large fused polygon and move. Use the [drawing method](#draw) to make new polygons (blue) with the fused ones as templates. Delete the fused polygons and move back the new polygons to make the tissue complete. <p/>
+  Click the edge of the large fused polygon and move. Use the [drawing method](#draw) to make new polygons (blue) with the fused ones as templates. Delete the fused polygons and move back the new polygons to make the tissue complete. <p/>
 
   <center><img src="`r paste0(url, "move_path.png")`" hspace=10><img src="`r paste0(url, "aligned_3_polygons.png")`" hspace="10"><img src="`r paste0(url, "new_polygon.png")`"></center><p/>
 
@@ -176,7 +177,7 @@ If a large fused polygon needs to be separated, one can use the eraser tool. Dra
 
 ## Configure the SVG Image with Gene Matrix
 
-  In the SVG image, each polygon has a unique ID. To plot spatial heatmaps, these IDs should be exactly replaced with sample names in the gene matrix. Even a dot, space, underscore, uppercase, or lowercase matters. No matter how the blank SVG image is created, it should be [placed inside a layer](#layer) before start the following steps.
+  In the SVG image, each polygon has a unique ID. To plot spatial heatmaps, these IDs should be exactly replaced with sample names in the gene matrix. Even a dot, space, underscore, uppercase, or lowercase matters. No matter how the blank SVG image is created, it should be [placed inside a layer/group](#layer) before start the following steps.
 
   10. Group same tissues <p/><p/>
   If multiple polygons belong to the same tissue type, they should be grouped together. The example of grouping epidermis is given below. Open "XML Editor..." under the "Edit" tab at the top, then the "XML Editor (Shift+Ctrl+X)" panel comes out on the right. Click all the epidermis polygons while pressing the "Shift" key, right click, and select "Group". A group should not contain another group.
@@ -228,16 +229,31 @@ Group other tissues, set ids and colours.
 
   <center><img src="`r paste0(url, "drag_new_group.png")`"></center><p/>
 
-  Similarly, add text to label other tissues.  
+  Similarly, add text to label other tissues. 
+  <center><img src="`r paste0(url, "root_R.png")`"></center><p/>
 
   17. Save the final SVG image, which is ready to use in the spatialHeatmap. The name of saved SVG image can only consists of letters, digits, underscores. E.g. "root_cross_final.svg" is acceptable while "root_cross_final(copy).svg" will give errors. <p/>
+
+## Plot the spatial heatmaps
+
+ In Figure 1, user defined tissue regions are coloured by the expression profile of a target gene under different contidions. For example, in [Table 1](#table) the expression value of gene "PSAC" in "epidermis" under the condition "140mM_1h" is "2.457910", after mapping the "epidermis" is coloured "dark yellow", corresponsing to "2.457910" in the colour scale.
+
+```{r, shm, eval=TRUE, echo=TRUE, warnings=FALSE, fig.align="center", fig.cap=('Figure 1. Spatial Heatmaps of the target gene \"PSAC\". User defined tissue regions are coloured by the expression profile of the target gene.')}
+
+  # The path of the formatted SVG image as shown above.  
+  svg.path <- system.file("extdata/shinyApp/example", "root_cross_final.svg", package = "spatialHeatmap")
+  # Mapping of the target gene "PSAC" to the SVG image. Multiple target genes can be mapped at the same time. Here only one is mapped. "exp" is the filtered expression matrix as shown above.
+  spatial_hm(svg=svg.path, data=exp, pOA=c(0, 0), CV=c(0, 100), ID="PSAC", col.com=c("yellow", "blue", "purple"), width=1, height=1, sub.title.size=9.5, layout="gene", ncol=3)
+
+```
+
 
 ## Troubleshooting
 
   1. Make sure the coloumn names are formatted in the right way.
-  2. Make sure the target tissue names are exactly samze between data matrix and SVG. Even a dot, space, underscore, uppercase, or lowercase matters.
-  3. Make sure all the paths, groups are placed in a large group (or layer) as a whole in the XML editor.
-  4. Make sure a group does not contain any other groups except for the large group..
+  2. Make sure the target tissue names are identical between data matrix and SVG. Even a dot, space, underscore, uppercase, or lowercase matters.
+  3. Make sure all the paths, groups are placed in a large group/layer as a whole in the XML editor.
+  4. Except for the large group/layer, make sure other groups contain only paths, no groups.
 
 # Reference
 
