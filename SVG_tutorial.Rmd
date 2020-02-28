@@ -254,6 +254,7 @@ Group other tissues, set ids and colours.
   2. Make sure the target tissue names are identical between data matrix and SVG. Even a dot, space, underscore, uppercase, or lowercase matters.
   3. Make sure all the paths, groups are placed in a large group/layer as a whole in the XML editor.
   4. Except for the large group/layer, make sure other groups contain only paths, no groups.
+  5. If some grouped polygons are absent in the spatial heatmaps, try to ungroup and regroup them in Inkscape.
 
 # Reference
 
