@@ -1,6 +1,7 @@
 *~
 *.swp
 # anatomogram/src/svg/svg_trans/*.R
+ebi/
 anatomogram/src/svg/svg_trans/*.txt
 anatomogram/.*
 anatomogram/html/
