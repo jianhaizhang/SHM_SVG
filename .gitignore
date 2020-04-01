@@ -1,12 +1,11 @@
 *~
 *.swp
-anatomogram/src/svg/svg_trans/*.R
+# anatomogram/src/svg/svg_trans/*.R
 anatomogram/src/svg/svg_trans/*.txt
 anatomogram/.*
 anatomogram/html/
 anatomogram/__mocks__/
 anatomogram/package*
-anatomogram/README.md
 anatomogram/README.md
 anatomogram/scripts/
 anatomogram/__test__/
