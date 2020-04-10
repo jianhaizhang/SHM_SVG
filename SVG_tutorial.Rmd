@@ -156,7 +156,7 @@ It is critical that the replicate names of same sample of condition must be iden
 <a name='tar_sh'></a>
 ```{r, eval=TRUE, echo=FALSE, warnings=FALSE}
 
-pa.sh <- system.file('extdata/example_data/target_shoot.txt', package='spatialHeatmap')
+pa.sh <- system.file('extdata/shinyApp/example/target_arab.txt', package='spatialHeatmap')
 target.sh <- read.table(pa.sh, header=TRUE, row.names=1, sep='\t')
 df <- subset(target.sh, samples=='root_pGL2' |samples=='root_pCO2')[, 2:3]
 kable(df, caption='Table 1 Targets file (metadata of data matrix column) of the data matrix. Promoter pGL2, pCO2, pSCR, pWOL labels root atrichoblast epidermis, root cortex meristematic zone, root endodermis, root vasculature respectively. Only the first 2 are shown. ')
@@ -194,7 +194,7 @@ Under the "Edit" tab on the top, select "XML Editor...". Click the group to sele
 
   <p/><center><img src="image/edit.png" width="30%" hspace=10><img src="image/xml_tab.png" width="30%" hspace=10><img src="image/set_id.png" width="30%"></center><p/>  
 
-Similarly, group and set id for pCO2, pSCR, pWOL respectively. When group the small vasculature polygons in the center, press "Shift" key and meanwhile draw a rectangle to select all of them. Note if a tissue sample contains only one polygon, then no need to group it, but the id should be identical with corresponding sample in the targets file in order to colour it in spatial heatmaps.  
+Similarly, group and set id for pCO2, pSCR, pWOL respectively. When group the small vasculature polygons in the center, a shortcut is to draw a rectangle over them to select all rather than click each individually. Note if a tissue sample contains only one polygon, then no need to group it, but the id should be identical with corresponding sample in the targets file in order to colour it in spatial heatmaps.  
 
   <p/><center><img src="image/final.png" width="30%"></center><p/>
 
