@@ -210,7 +210,7 @@ It is crucial that this container group must be the last element on the "XML Edi
 
   <p/><center><img src="image/last_element.png" width="30%" hspace=10><img src="image/last_element1.png" width="30%"></center><p/>  
 
-By now, the SVG image is done. Save the formatted SVG image as "root.svg", which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the SVG name ends with ".svg" and the front should only consist of letters, digits, dots, or underscores. E.g. root(1).svg is not acceptable.   
+By now, the SVG image is done. Save the formatted SVG image as "root.svg", which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the SVG file name ends with ".svg" and the front should only consist of letters, digits, dots, or underscores. E.g. root(1).svg is not acceptable.   
 
 
 
