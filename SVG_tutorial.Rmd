@@ -135,11 +135,11 @@ Use "Ctrl+A" to select all polygons. Click "No paint" under "Fill" tab on the fi
 
   <p/><center><img src="image/no_paint.png" width="30%" hspace=10><img src="image/blank.png" width="30%"></center><p/>  
 
-# Format SVG Image
+# Format Data Matrix
 
-This step is in accordance with the data matrix. The data matrix with rows and columns being genes and sample/conditions respectively is formatted by a targets file (a dataframe of column metadata). The targets file is a data frame with at least 2 columns defining replicates of samples and conditions respectively.  
+The formatting process of SVG image is in accordance with the data matrix. The data matrix with rows and columns being genes and sample/conditions respectively is formatted by a targets file (a dataframe of column metadata). The targets file is a data frame with at least 2 columns defining replicates of samples and conditions respectively.  
 
-## Requirements on the targets file
+**Requirements on the targets file**
 
 1. It is a data frame with at least 2 columns. The rows corresponds with columns in the data matrix.
  
@@ -163,9 +163,11 @@ kable(df, caption='Table 1 Targets file (metadata of data matrix column) of the 
 
 ```
 
+# Format SVG Image
+
 To plot spatial heatmaps successfully, the SVG image must be formatted according to the following requirements.  
 
-## Requirements on SVG format
+**Requirements on SVG format**
 
 1. A path represents a shape. If a tissue consists of multiple paths and is expected to be colured in the spatial heatmap, all its paths must be grouped as a whole (labeled by tag "g"). The group id is the tissue id and the inside path ids are useless. A group should not include another group, which means all elements in a group should be single paths. However, if a multiple-path tissue is not expected to coloured in the spatial heatmap, there is no need to group them and the paths can keep random ids.
 
@@ -179,7 +181,7 @@ The following section shows the process of formatting the SVG image.
 
 **Group same tissues**  
 
-Take the pGL2 as an example. Select polygons of the this sample by clicking polygon edge while pressing "Shift" key. Mouse over any edge of selected polygons, right click and select "Group".   
+The same tissues in the SVG repository are already grouped. If the SVG image is made by following the above steps, same tissues should be grouped so as to be coloured in spatial heatmaps. Take the root_pGL2 as an example. Select polygons of the this sample by clicking polygon edge while pressing "Shift" key. Mouse over any edge of selected polygons, right click and select "Group".   
 
   <p/><center><img src="image/select.png" width="30%" hspace=10><img src="image/group.png" width="30%"></center><p/>  
 
@@ -190,11 +192,11 @@ Click "Flat color" under the "Fill" tab on the fill and stroke panel, and use a 
 <a name='set_id'></a>
 **Set tissue id**  
   
-Under the "Edit" tab on the top, select "XML Editor...". Click the group to select it. On the "XML Editor (Shift+Ctrl+X)" panel, first click the id and type in "pGL2" then click "Set". After that, the first group is done.  
+Under the "Edit" tab on the top, select "XML Editor...". Click the group to select it. On the "XML Editor (Shift+Ctrl+X)" panel, first click the id and type in "root_pGL2" then click "Set". It is critial that the id "root_pGL2" is identical with the corresponding tissue in the data matrix. After that, the first group is done.  
 
   <p/><center><img src="image/edit.png" width="30%" hspace=10><img src="image/xml_tab.png" width="30%" hspace=10><img src="image/set_id.png" width="30%"></center><p/>  
 
-Similarly, group and set id for pCO2, pSCR, pWOL respectively. When group the small vasculature polygons in the center, a shortcut is to draw a rectangle over them to select all rather than click each individually. Note if a tissue sample contains only one polygon, then no need to group it, but the id should be identical with corresponding sample in the targets file in order to colour it in spatial heatmaps.  
+Similarly, group and set id for root_pCO2, root_pSCR, root_pWOL respectively. When group the small vasculature polygons in the center, a shortcut is to draw a rectangle over them to select all rather than click each individually. Note if a tissue sample contains only one polygon, then no need to group it, but the id should be identical with corresponding sample in the targets file in order to colour it in spatial heatmaps.  
 
   <p/><center><img src="image/final.png" width="30%"></center><p/>
 
@@ -202,7 +204,7 @@ Brown, blue, orange, purple labels pGL2, pCO2, pSCR, pWOL respectively. The blan
 
 **Container group**  
   
-At last, it is required to group all groups and independent paths as a container group. To do so, use "Ctrl+A" to select all, mouse over the polygons, right click, and click group. It is optional to change the container group id.  
+At last, it is required to group all groups and independent paths as a container group. To do so, use "Ctrl+A" to select all, mouse over the polygons, right click, and click group. It is optional to change the container group id. Note this step is already done in SVG images from the repository.   
 
   <p/><center><img src="image/group_all.png" width="30%" hspace=10><img src="image/set_container.png" width="30%"><p/>  
 
