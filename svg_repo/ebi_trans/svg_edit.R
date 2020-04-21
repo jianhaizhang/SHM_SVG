@@ -70,10 +70,8 @@ svg <- list.files(path='/home/jzhan067/SVG_tutorial_file/anatomogram/src/svg/', 
 # Avoid running this function to all SVG images, since some images have dislocated polygons and need adjustment.
 # for (i in svg[8]) svg.edit(path.in=i, path.out=path.out)
 
-# Name the container group.
-library(xml2)
+# In original EBI SVG, some tissues have label/ontology id while others donot, so should not rely on label to add the ontology attribute. 
 svg1 <- list.files(path='/home/jzhan067/SVG_tutorial_file/svg_repo/ebi_trans', pattern='.svg$', full.names=T)
-path.out <- '/home/jzhan067/SVG_tutorial_file/svg_repo/ebi_trans/'
 path.out <- '~/test/'
 
 id.ont <- NULL; for (path.in in svg1) {
@@ -88,14 +86,23 @@ id.ont <- NULL; for (path.in in svg1) {
   ids <- NULL; for (i in seq_along(chdn1)) {
 
     ont <- xml_attr(chdn1[[i]], 'ontology')
-    if (is.na(ont)) next
     id <- xml_attr(chdn1[[i]], 'id')
     for (j in seq_along(chdn3)) {
 
       ont1 <- xml_attr(chdn3[[j]], 'ontology')
       if (is.na(ont1)) next
       id1 <- xml_attr(chdn3[[j]], 'id') 
-      if (ont==ont1) { 
+      if (is.na(ont) & !is.na(ont1)) {
+
+        if (id==id1) {
+
+          xml_set_attr(chdn1[[i]], 'ontology', ont1)
+          names(id1) <- ont1; ids <- c(ids, id1); break        
+
+        }
+
+      }
+      if (!is.na(ont)) if (ont==ont1) { 
 
         xml_attr(chdn1[[i]], 'id') <- id1
         names(id1) <- ont; ids <- c(ids, id1); break
@@ -109,78 +116,6 @@ id.ont <- NULL; for (path.in in svg1) {
 
 }
 
-
-for (path.in in svg1) {
-
-  doc <- read_xml(path.in); chdn <- xml_children(doc)
-  xml_attr(chdn[[xml_length(doc)]], 'id') <- 'container' 
-  na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; pa <- paste0(path.out, '/', na)
-  write_xml(doc, file=pa); cat(pa, '\n')
-
-}
-
-# Make names for ids.
-library(XML)
-for (path.in in svg1) {
-
-  xmlfile <- xmlParse(path.in); xmltop <- xmlRoot(xmlfile)
-  ply <- xmltop[[xmlSize(xmltop)]]
-  for (j in seq_len(xmlSize(ply))) { 
-    
-    id0 <- make.names(xmlGetAttr(ply[[j]], 'id'))
-    xmlAttrs(ply[[j]])[['id']] <- id0
-
-  }
-  na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; pa <- paste0(path.out, '/', na)
-  saveXML(xmlfile, file=pa); cat(pa, '\n')
-
-}
-
-
-# In original EBI SVG, some tissues have label/ontology id while others donot, so should not rely on label to add the ontology attribute. 
-path.out <- '~/test/'; for (i in svg) svg.edit(path.in=i, path.out=path.out)
-
-id.ont <- NULL; for (path.in in svg1) {
-
-  na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]
-  xmlfile <- xmlParse(path.in); xmltop <- xmlRoot(xmlfile)
-  ply <- xmltop[[xmlSize(xmltop)]]
-  path.in1 <- paste0(path.out, na) 
-  xmlfile1 <- xmlParse(path.in1); xmltop1 <- xmlRoot(xmlfile1)
-  ply1 <- xmltop1[[xmlSize(xmltop1)]]
-
-  ids <- NULL; for (j in seq_len(xmlSize(ply))) {
-
-    id <- xmlGetAttr(ply[[j]], 'id')
-    # lab <- xmlGetAttr(ply[[j]], 'label')
-    for (k in seq_len(xmlSize(ply1))) {
-
-      id1 <- xmlGetAttr(ply1[[k]], 'id')
-      # lab1 <- xmlGetAttr(ply1[[k]], 'label') 
-      # if (!is.null(lab) & !is.null(lab1) & is.null(xmlGetAttr(ply[[j]], 'href'))) { if (lab==lab1) { 
-        
-       # ont <- xmlGetAttr(ply1[[k]], 'ontology')
-       # addAttributes(ply[[j]], ontology=ont)
-       # names(id) <- ont; ids <- c(ids, id); break
-
-      # } } else { # If there are two "if" in front, they should be separated by "{}". Otherwise the "else" follows the 2nd "if".
-
-        if (id==id1) {
-
-          ont <- xmlGetAttr(ply1[[k]], 'ontology')
-          addAttributes(ply[[j]], ontology=ont)
-          names(id) <- ont; ids <- c(ids, id); break
-
-        }
-
-     # }
-
-    }
-
-  }; lis <- list(ids); names(lis) <- na; id.ont <- c(id.ont, lis)  
-  saveXML(xmlfile, file=path.in); cat(path.in, '\n')
-
-}
 
 library(rols)
 
@@ -206,11 +141,11 @@ for (i in seq_len(nrow(df))) {
 
 species='homo sapiens'; tissue='parotid.gland'
 
-retrunSVGFeature <- function(tissue, species) {
+SVG_feature <- function(tissue, species) {
 
 sp <- sub(' |_|\\.|-', '|', species); tis <- sub(' |_|\\.|-', '|', tissue)
 w <- grepl(sp, df$SVG, ignore.case=TRUE) & grepl(tis, df$tissue, ignore.case=TRUE); return(df[w, ])
 
 }
 
-retrunSVGFeature(tissue='parotid.gland', species='homo sapiens')
+SVG_feature(tissue='parotid.gland', species='homo sapiens')
