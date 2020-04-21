@@ -1,94 +1,126 @@
 svg.edit <- function(path.in, path.out) {
 
-  library(XML); library(xml2)
-  xmlfile <- xmlParse(path.in); xmltop <- xmlRoot(xmlfile)
-  spa <- xmlGetAttr(xmltop, 'xml:space')
-  # xml:space="preserve" results in emplty text nodes in the saved SVG image, so should be changed.
-  if (!is.null(spa)) if (spa=='preserve') { 
+  library(xml2)
+  doc <- read_xml(path.in); spa <- xml_attr(doc, 'space')
+  if (!is.na(spa)) if (spa=='preserve') xml_set_attr(doc, 'xml:space', 'default')
 
-    addAttributes(xmltop, 'xml:space'='none')
-  
-  }
-  style <- 'fill:#62fafa;fill-opacity:1;stroke:#000000;stroke-width:0.21602426;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1'
-  out <- xmltop[[xmlSize(xmltop)-1]]; ply <- xmltop[[xmlSize(xmltop)]]
-  # Move base polygons to the top of the last group.
-  if (xmlName(out)=='g') for (i in rev(seq_len(xmlSize(out)))) {
+  len <- xml_length(doc)
+  out <- xml_children(doc)[[len-1]]; ply <- xml_children(doc)[[len]]; xml_set_attr(ply, 'id', 'container')
+  # Move outline polygons to the top of the last group.
+  if (xml_name(out)=='g') for (i in rev(seq_len(xml_length(out)))) {
 
-    if (xmlName(out[[i]])=='path'|xmlName(out[[i]])=='g') { addChildren(ply, kid=out[[i]], at=0) } 
+    na <- xml_name(xml_children(out)[[i]])
+    if (na=='path'|na=='g') { xml_add_child(.x=ply, .value=xml_children(out)[[i]], .where=0, .copy=FALSE) } 
 
-  }; removeNodes(out) 
+  }; xml_remove(out, free=FALSE)
 
   # Change 'id' and 'style' of target polygons.
-  ids <- NULL; for (i in seq_len(xmlSize(ply))) {
-
-    if (is.null(ply[[i]][[1]])) addAttributes(ply[[i]], style=style)
+  style <- 'fill:#62fafa;fill-opacity:1;stroke:#000000;stroke-width:0.21602426;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1'
+  chdn <- xml_children(ply); xml_set_attr(chdn, 'style', style)
+  ids <- NULL; for (i in seq_len(xml_length(ply))) {
 
     # Apply to original svg code downloaded from 'https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg'. Assign names to each path or group.
-    if (any(names(ply[[i]])=='title')) { 
-	  
-      id <- make.names(xmlValue(ply[[i]][['title']]))
-      ont <- xmlGetAttr(ply[[i]], 'id') 
-      addAttributes(ply[[i]], id=id); addAttributes(ply[[i]], ontology=ont)
+    chdn1 <- xml_children(chdn[[i]]); na <- xml_name(chdn1)
+    if (any(na=='title')) { 
+	 
+      tit <- chdn1[na=='title']
+      # Use title id as id.
+      id <- make.names(xml_attr(tit, 'id'))
+      # Use title text as id. id <- make.names(xml_text(tit))
+      xml_remove(tit, free=FALSE) # Only nodes with a title are assigned an "ontology". 
+      ont <- xml_attr(chdn[[i]], 'id')
+      xml_set_attr(chdn[[i]], 'id', id); xml_set_attr(chdn[[i]], 'ontology', ont)      
       names(id) <- ont; ids <- c(ids, id)
-      removeNodes(ply[[i]][['title']]); addAttributes(ply[[i]], style=style)
-  
+ 
     }
 
-    if (xmlSize(ply[[i]])>=1) for (j in seq_len(xmlSize(ply[[i]]))) { addAttributes(ply[[i]][[j]], style=style) }
+  }; na <- xml_name(chdn); xml_remove(chdn[na=='a'], free=FALSE)  
 
-  }; for (i in seq_len(xmlSize(ply))) if (xmlName(ply[[i]])=='a') removeNodes(ply[[i]])
+  # 'use' node outside 'g' group: copy the referenced node and use it to replace the use node. Keep the 'id' of use node unchanged.
+  w <- which(xml_name(chdn)=='use'); if (length(w)!=0) { 
 
-  # 'use' node outside 'g' group: Copy the referenced node and use it to replace the use node. Keep the 'id' of use node unchanged.
-  w <- which(names(ply)=='use'); if (length(w)!=0) { 
-
-    label <- NULL; for (i in seq_len(xmlSize(ply))) { label <- c(label, paste0('#', xmlGetAttr(ply[[i]], 'inkscape:label'))) }
+    label <- NULL; for (i in seq_len(xml_length(ply))) { label <- c(label, paste0('#', xml_attr(chdn[[i]], 'ontology'))) }
     for (i in w) {
       
       # Keep attributes of 'use' node unchanged to avoid polygon shifting in position.
-      nod <- ply[[i]]; att <- xmlAttrs(nod); na <- names(att); val <- as.character(att); names(val) <- na
-      w1 <- which(label %in% xmlGetAttr(nod, 'xlink:href')); id <- xmlGetAttr(nod, 'id')
-      ply[[i]] <- xmlClone(ply[[w1]], recursive=TRUE); addAttributes(ply[[i]], .attrs=val); addAttributes(ply[[i]], ontology=id)
+      nod <- chdn[[i]]; att <- xml_attrs(nod)
+      w1 <- which(label %in% xml_attr(nod, 'href'))
+      xml_replace(chdn[[i]], .value=chdn[[w1]], .copy=TRUE)
 
     }
 
   }
-
-  na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; pa <- paste0(path.out, '/', na)
-  # Name the container group.
-  xmlAttrs(xmltop[[xmlSize(xmltop)]])[['id']] <- 'container'
-  
+ 
   # Check 'use' node inside 'g' group.
-  w <- which(names(ply)=='g'); for (i in w) {
+  w <- which(xml_name(xml_children(ply))=='g'); for (i in w) {
 
-    nod <- ply[[i]]; w1 <- which(names(nod)=='use')
-    if (length(w1)!=0) { cat(xmlGetAttr(nod, 'id'), ': \'use\' inside \'group\'', '\n') }
+    nod <- xml_children(ply)[[i]]
+    w1 <- xml_name(xml_children(nod))=='use'
+    if (any(w1)) { cat(xml_attr(nod, 'id'), ': \'use\' inside \'group\'', '\n') }
 
   }
-  saveXML(xmlfile, file=pa); cat(pa, '\n'); return(ids)
+  
+  na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; pa <- paste0(path.out, '/', na)
+  write_xml(doc, file=pa); cat(pa, '\n'); return(ids)
 
 }
 
 svg <- list.files(path='/home/jzhan067/SVG_tutorial_file/anatomogram/src/svg/', pattern='.svg$', full.names=T)
 # In the svg tag, xml:space="preserve" introduces empty text nodes, e.g. mus_musculus.brain.svg. Thus this attribut should be removed.  
 # Avoid running this function to all SVG images, since some images have dislocated polygons and need adjustment.
-# for (i in svg[8]) svg.edit(path.in=i, path.out='/home/jzhan067/SVG_tutorial_file/anatomogram/src/svg/svg_trans')
+# for (i in svg[8]) svg.edit(path.in=i, path.out=path.out)
 
 # Name the container group.
-library(XML)
+library(xml2)
 svg1 <- list.files(path='/home/jzhan067/SVG_tutorial_file/svg_repo/ebi_trans', pattern='.svg$', full.names=T)
 path.out <- '/home/jzhan067/SVG_tutorial_file/svg_repo/ebi_trans/'
+path.out <- '~/test/'
 
-for (i in svg1) {
+id.ont <- NULL; for (path.in in svg1) {
 
-  path.in <- i
-  xmlfile <- xmlParse(path.in); xmltop <- xmlRoot(xmlfile)
-  xmlAttrs(xmltop[[xmlSize(xmltop)]])[['id']] <- 'container'
+  doc <- read_xml(path.in); chdn <- xml_children(doc)
+  ply <- chdn[[xml_length(doc)]]; chdn1 <- xml_children(ply)
+  na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]
+  path.in1 <- paste0(path.out, na) 
+  doc1 <- read_xml(path.in1); chdn2 <- xml_children(doc1)
+  ply1 <- chdn2[[xml_length(doc1)]]; chdn3 <- xml_children(ply1)  
+
+  ids <- NULL; for (i in seq_along(chdn1)) {
+
+    ont <- xml_attr(chdn1[[i]], 'ontology')
+    if (is.na(ont)) next
+    id <- xml_attr(chdn1[[i]], 'id')
+    for (j in seq_along(chdn3)) {
+
+      ont1 <- xml_attr(chdn3[[j]], 'ontology')
+      if (is.na(ont1)) next
+      id1 <- xml_attr(chdn3[[j]], 'id') 
+      if (ont==ont1) { 
+
+        xml_attr(chdn1[[i]], 'id') <- id1
+        names(id1) <- ont; ids <- c(ids, id1); break
+      
+      }
+
+    }
+
+  }; lis <- list(ids); names(lis) <- na; id.ont <- c(id.ont, lis)  
+  write_xml(doc, file=path.in); cat(path.in, '\n')
+
+}
+
+
+for (path.in in svg1) {
+
+  doc <- read_xml(path.in); chdn <- xml_children(doc)
+  xml_attr(chdn[[xml_length(doc)]], 'id') <- 'container' 
   na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; pa <- paste0(path.out, '/', na)
-  saveXML(xmlfile, file=pa); cat(pa, '\n')
+  write_xml(doc, file=pa); cat(pa, '\n')
 
 }
 
 # Make names for ids.
+library(XML)
 for (path.in in svg1) {
 
   xmlfile <- xmlParse(path.in); xmltop <- xmlRoot(xmlfile)
