@@ -24,9 +24,12 @@ svg.edit <- function(path.in, path.out) {
     if (any(na=='title')) { 
 	 
       tit <- chdn1[na=='title']
-      # Use title id as id. id <- make.names(xml_attr(tit, 'id'))
+      
+      # Use title id as id. 
+      id <- make.names(xml_attr(tit, 'id'))
       # Use title text as id. 
-      id <- make.names(xml_text(tit))
+      id2 <- make.names(xml_text(tit))
+      if (grepl('^title', id)) id <- id2
       xml_remove(tit, free=FALSE) # Only nodes with a title are assigned an "ontology". 
       ont <- xml_attr(chdn[[i]], 'id')
       xml_set_attr(chdn[[i]], 'id', id); xml_set_attr(chdn[[i]], 'ontology', ont)      
