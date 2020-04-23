@@ -25,10 +25,8 @@ svg.edit <- function(path.in, path.out) {
 	 
       tit <- chdn1[na=='title']
       
-      # Use title id as id. 
-      id <- make.names(xml_attr(tit, 'id'))
-      # Use title text as id. 
-      id2 <- make.names(xml_text(tit))
+      id <- make.names(xml_attr(tit, 'id')) # Use title id as id.
+      id2 <- make.names(xml_text(tit)) # Use title text as id.
       if (grepl('^title', id)) id <- id2
       xml_remove(tit, free=FALSE) # Only nodes with a title are assigned an "ontology". 
       ont <- xml_attr(chdn[[i]], 'id')
@@ -72,13 +70,14 @@ svg.edit <- function(path.in, path.out) {
 
 svg <- list.files(path='/home/jzhan067/SVG_tutorial_file/anatomogram/src/svg/', pattern='.svg$', full.names=T)
 # In the svg tag, xml:space="preserve" introduces empty text nodes, e.g. mus_musculus.brain.svg. Thus this attribut should be removed.  
-# Avoid running this function to all SVG images, since some images have dislocated polygons and need adjustment.
+# Avoid running this function to all SVG images, since some images have dislocated polygons and need manual adjustment.
 # for (i in svg[8]) svg.edit(path.in=i, path.out=path.out)
 
 # In original EBI SVG, some tissues have label/ontology id while others donot, so should not rely on label to add the ontology attribute. 
 svg1 <- list.files(path='/home/jzhan067/SVG_tutorial_file/svg_repo/ebi_trans', pattern='.svg$', full.names=T)
 path.out <- '~/test/'
 
+# Map ids/ontologys from SVGs resulting from svg.edit to these after maual adjustment. 
 id.ont <- NULL; for (path.in in svg1) {
 
   doc <- read_xml(path.in); chdn <- xml_children(doc)
@@ -124,82 +123,88 @@ id.ont <- NULL; for (path.in in svg1) {
 
 
 
-return_feature <- function(feature, species, desc=FALSE, return.all=FALSE, dir=NULL) {
-
 library(xml2); library(rols)
-options(stringsAsFactors=FALSE)
-dir.check <- !is.null(dir) 
-if (dir.check) dir.check <- !(is.na(dir)) 
-if (dir.check) { dir.check <- dir.exists(dir); if (!dir.check) return("\'dir\' is not valid!") }
-if (dir.check) {
-  
-  cat('Downloading SVG images... \n')
-  tmp <- tempdir(); tmp1 <- paste0(tempdir(), '/git.zip')
-  tmp2 <- paste0(tmp, '/git'); if (!dir.exists(tmp2)) dir.create(tmp2)
-  download.file('https://github.com/jianhaizhang/SVG_tutorial_file/archive/master.zip', tmp1); unzip(tmp1, exdir=tmp2)
-  tmp3 <- paste0(tmp2, '/SVG_tutorial_file-master/svg_repo/ebi_trans')
-  svgs <- list.files(path=tmp3, pattern='.svg$', full.names=TRUE)
-  if (!(is.na(dir)) & !is.null(dir)) if (dir.exists(dir)) { 
-    
-    # "file.copy" does not overwrite.
-    sapply(svgs, function (i) file.copy(i, dir)) 
-    svgs <- list.files(path=dir, pattern='.svg$', full.names=TRUE)
+return_feature <- function(feature, species, remote=FALSE, dir=NULL, desc=FALSE, return.all=FALSE) {
 
-  }
+  options(stringsAsFactors=FALSE)
+  dir.check <- !is.null(dir) 
+  if (dir.check) dir.check <- !(is.na(dir)) else stop("\'dir\' is not valid!") 
+  if (dir.check) { dir.check <- dir.exists(dir); if (!dir.check) stop("\'dir\' is not valid!") } else stop("\'dir\'is not valid!")
 
-  cat('Accessing features... \n')
-  id.ont <- NULL; for (path.in in svgs) {
+  # Parse and return features.
+  ftr.return <- function(svgs, desc=desc) { 
 
-    doc <- read_xml(path.in); chdn <- xml_children(doc)
-    ply <- chdn[[xml_length(doc)]]; chdn1 <- xml_children(ply)
-    na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; len <- xml_length(ply)
-    ids <- NULL; for (j in seq_len(len)) {
+    cat('Accessing features... \n')
+    id.ont <- NULL; for (path.in in svgs) {
 
-      ont <- xml_attr(chdn1[[j]], 'ontology')
-      if (ont!="NULL" & !is.na(ont)) { 
+      doc <- read_xml(path.in); chdn <- xml_children(doc)
+      ply <- chdn[[xml_length(doc)]]; chdn1 <- xml_children(ply)
+      na <- strsplit(path.in, '/')[[1]]; na <- na[grep('.svg$', na)]; len <- xml_length(ply)
+      ids <- NULL; for (j in seq_len(len)) {
 
+        ont <- xml_attr(chdn1[[j]], 'ontology')
         id <- xml_attr(chdn1[[j]], 'id'); names(id) <- ont
         ids <- c(ids, id)
 
+       }; dup <- duplicated(ids)
+       if (any(dup)) stop(paste0("Duplicated feature \'", paste0(ids[dup], collapse=', '), "\' detected in ", path.in, "!"))
+       lis <- list(ids); names(lis) <- na; id.ont <- c(id.ont, lis) 
+
+    }
+
+    df <- NULL; for (i in seq_along(id.ont)) {
+
+      feat <- id.ont[[i]]
+      df0 <- data.frame(feature=feat, ontology=names(feat), row.names=NULL)
+      df0$SVG <- names(id.ont[i]); df0$index <- as.numeric(rownames(df0))
+      df <- rbind(df, df0)
+
+    }; rownames(df) <- NULL
+
+    if (desc==TRUE) {
+  
+      cat('Appending descriptions... \n')
+      df$description <- NA; for (i in seq_len(nrow(df))) {
+
+        ont <- df[i, 'ontology']; abbr <- tolower(sub('_.*', '', ont))
+        trm <- tryCatch({ term(abbr, ont) }, error=function(e) { return(NA) })
+        if (is(trm, 'Term')) { des <- termDesc(trm); if (!is.null(des)) df[i, 'description'] <- termDesc(trm) }
+  
       }
 
-     }; lis <- list(ids); names(lis) <- na; id.ont <- c(id.ont, lis) 
+    }; return(df)
 
   }
 
-  df <- NULL; for (i in seq_along(id.ont)) {
-
-    if (is.null(id.ont[[i]])) next
-    feat <- id.ont[[i]]; feat <- feat[names(feat)!='']
-    df0 <- as.data.frame(feat, stringsAsFactors=FALSE)
-    colnames(df0) <- 'feature'
-    df0$ontology <- rownames(df0); df0$SVG <- names(id.ont[i]) 
-    df <- rbind(df, df0)
-
-  }; rownames(df) <- NULL
-
-  if (desc==TRUE) {
+  if (remote==TRUE) {
   
-    cat('Appending descriptions... \n')
-    df$description <- NA
-    for (i in seq_len(nrow(df))) {
+    cat('Downloading SVG images... \n')
+    tmp <- tempdir(check=TRUE); tmp1 <- paste0(tempdir(), '/git.zip')
+    tmp2 <- paste0(tmp, '/git'); if (!dir.exists(tmp2)) dir.create(tmp2)
+    download.file('https://github.com/jianhaizhang/SVG_tutorial_file/archive/master.zip', tmp1); unzip(tmp1, exdir=tmp2)
+    tmp3 <- paste0(tmp2, '/SVG_tutorial_file-master/svg_repo')
+    svgs <- list.files(path=tmp3, pattern='.svg$', full.names=TRUE, recursive=TRUE)
+    df <- ftr.return(svgs=svgs, desc=desc)
+    if (return.all==TRUE) { 
 
-      ont <- df[i, 'ontology']; abbr <- tolower(sub('_.*', '', ont))
-      trm <- tryCatch({ term(abbr, ont) }, error=function(e) { return(NA) })
-      if (is(trm, 'Term')) { des <- termDesc(trm); if (!is.null(des)) df[i, 'description'] <- termDesc(trm) }
-      if (!is(trm, 'Term')) next
-  
+      svgs.na <- sapply(svgs, function(i) { str <- strsplit(i, '/')[[1]]; str[length(str)] })
+      svgs1 <- list.files(path=dir, pattern='.svg$', full.names=TRUE)
+      svgs.na1 <- list.files(path=dir, pattern='.svg$', full.names=FALSE)
+      svgs1.rm <- svgs1[svgs.na1 %in% svgs.na] 
+      cat(paste0('Overwriting: ', svgs1.rm, '\n')); file.remove(svgs1.rm)   
+      # "file.copy" does not overwrite.
+      sapply(svgs, function (i) file.copy(i, dir)); return(df)
+
     }
 
-  }; if (return.all==TRUE) return(df)
+  } else {
 
-} else {
+    svgs <- list.files(path=dir, pattern='.svg$', full.names=TRUE)
+    df <- ftr.return(svgs=svgs, desc=desc)
+    if (return.all==TRUE) return(df)
 
-  path <- system.file("extdata/svg_feature", "svg_feature.txt", package="spatialHeatmap")
-  df <- read.table(path, sep='\t', header=T)
-  if (desc==FALSE) df <- df[, -4]; if (return.all==TRUE) return(df)
-
-}
+  }
+  
   sp <- gsub(' |_|\\.|-|;|,', '|', species); ft <- gsub(' |_|\\.|-|;|,', '|', feature)
   sp <- strsplit(sp, '\\|')[[1]]; ft <- strsplit(ft, '\\|')[[1]]
   df.idx <- NULL; for (i in sp) {
@@ -213,42 +218,50 @@ if (dir.check) {
 
   } 
   w <- which(rowSums(df.idx)==ncol(df.idx))
-  df1 <- df[w, ]; rownames(df1) <- NULL; return(df1)
+  df1 <- df[w, ]; rownames(df1) <- NULL
+  
+  if (remote==TRUE) {
+
+    svgs.cp <- svgs[svgs.na %in% df1$SVG]
+    svgs.rm <- svgs1[svgs.na1 %in% df1$SVG]
+    sapply(svgs.cp, function (i) file.copy(i, dir))
+
+  }; unlink(tmp, recursive=TRUE); return(df1)
 
 }
 
 
-ft1 <- return_feature(feature='frontal cortex', species='homo sapiens', desc=FALSE, return.all=F, dir=NA)
+ft1 <- return_feature(feature='frontal cortex', species='homo sapiens', desc=FALSE, return.all=F, dir='~/test1', remote=F)
 
 ft2 <- cbind(ft2=c('frontal.cortex', 'prefrontal.cortex', 'prefrontal.cortex', 'frontal.cortex', 'frontal.cortex', 'prefrontal.cortex'), ft1)
+ft2 <- cbind(ft2=c('outline', 'outline', 'outline', 'outline2', 'outline3', 'outline4'), ft1)
 
-feature=ft2; dir='~/test'
+feature=ft2; dir='~/test1'
+library(xml2)
 update_feature <- function(feature, dir) {
 
-  library(xml2)
   dir.check <- !is.null(dir) 
-  if (dir.check) dir.check <- !(is.na(dir)) 
-  if (dir.check) { dir.check <- dir.exists(dir); if (!dir.check) return("\'dir\' is not valid!") }
-  svgs <- paste0(dir, '/', feature$SVG)  
-  for (i in seq_along(svgs)) {
+  if (dir.check) dir.check <- !(is.na(dir)) else stop("\'dir\' is not valid!") 
+  if (dir.check) { dir.check <- dir.exists(dir); if (!dir.check) stop("\'dir\' is not valid!") } else stop("\'dir\'is not valid!")
+  feature[, 1] <- as.character(feature[, 1])
+  feature$index <- as.numeric(feature$index)
+  svgs.na <- unique(feature$SVG)
+  for (i in svgs.na) {
 
-    path.in <- svgs[i]
+    df0 <- subset(feature, SVG==i); dup <- duplicated(df0[, 1])
+    if (any(dup)) stop(paste0("Duplicated feature \'", paste0(df0[, 1][dup], collapse=', '), "\' detected in ", i, "!"))
+    path.in <- paste0(dir, '/', i)  
     doc <- read_xml(path.in); chdn <- xml_children(doc)
     ply <- chdn[[xml_length(doc)]]; chdn1 <- xml_children(ply)
-    len <- xml_length(ply)
-    
-    for (j in chdn1) {
-
-     ont <- xml_attr(j, 'ontology')
-     if (is.na(ont)) next; if (ont=='NULL') next
-     if (feature$ontology[i]==ont) { id <- as.character(feature[i, 1]); xml_set_attr(j, 'id', id); cat("Set", id, "in", svgs[i], "\n"); break }
-
-    }; write_xml(doc, file=svgs[i])
-  } 
+    cat(paste0('Setting \'', paste0(df0[, 1], collapse=', '), '\' in ', path.in, '\n'))
+    xml_set_attr(chdn1[df0$index], 'id', df0[, 1])
+    write_xml(doc, file=path.in)
+  
+  }
 
 }
 
-update_feature(feature=ft2, dir='~/test')
+update_feature(feature=ft2, dir='~/test1')
 
 
 

@@ -11,8 +11,8 @@ anatomogram/README.md
 anatomogram/scripts/
 anatomogram/__test__/
 anatomogram/w*
-anatomogram/src/svg/*.svg
-anatomogram/src/svg/*.md
+anatomogram/src/svg/.svg
+anatomogram/src/svg/.md
 anatomogram/src/img
 anatomogram/src/json
 anatomogram/src/*.js
