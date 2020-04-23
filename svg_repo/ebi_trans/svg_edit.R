@@ -120,7 +120,38 @@ id.ont <- NULL; for (path.in in svg1) {
 
 }
 
+# Add ontology id to example SVG images in spatialHeatmap.
+library(xml2)
+path1 <- '~/spatialHeatmap/inst/extdata/shinyApp/example/'
+path2 <- '~/SVG_tutorial_file/svg_repo/ebi_trans/'
+svg.pa1 <- list.files(path=path1, pattern='.svg$', full.names=TRUE)
+svg.na1 <- list.files(path=path1, pattern='.svg$', full.names=FALSE)
 
+for (i in seq_along(svg.pa1)) {
+
+  svg.pa2 <- paste0(path2, svg.na1[i]); if (!file.exists(svg.pa2)) next
+  doc1 <- read_xml(svg.pa1[i]); chdn1 <- xml_children(doc1)
+  ply1 <- chdn1[[xml_length(doc1)]]; chdn2 <- xml_children(ply1)
+  len1 <- xml_length(ply1)
+  
+  doc2 <- read_xml(svg.pa2); chdn3 <- xml_children(doc2)
+  ply2 <- chdn3[[xml_length(doc2)]]; chdn4 <- xml_children(ply2)
+  len2 <- xml_length(ply2)
+
+  for (j in seq_along(len1)) {
+
+    id1 <- make.names(xml_attr(chdn2[j], 'id'))
+    xml_attr(chdn2[j], 'id') <- id1
+    for (k in seq_along(len2)) {
+
+      id2 <- xml_attr(chdn4[k], 'id')
+      if (id1==id2) { xml_set_attr(chdn2[j], 'ontology', xml_attr(chdn4[k], 'ontology')); break }
+
+    }
+
+  }; write_xml(doc1, file=svg.pa1[i]); cat(svg.pa1[i], '\n')
+
+}
 
 
 library(xml2); library(rols)
