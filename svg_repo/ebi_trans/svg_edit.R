@@ -138,11 +138,11 @@ for (i in seq_along(svg.pa1)) {
   ply2 <- chdn3[[xml_length(doc2)]]; chdn4 <- xml_children(ply2)
   len2 <- xml_length(ply2)
 
-  for (j in seq_along(len1)) {
+  for (j in seq_len(len1)) {
 
     id1 <- make.names(xml_attr(chdn2[j], 'id'))
     xml_attr(chdn2[j], 'id') <- id1
-    for (k in seq_along(len2)) {
+    for (k in seq_len(len2)) {
 
       id2 <- xml_attr(chdn4[k], 'id')
       if (id1==id2) { xml_set_attr(chdn2[j], 'ontology', xml_attr(chdn4[k], 'ontology')); break }
@@ -155,7 +155,7 @@ for (i in seq_along(svg.pa1)) {
 
 
 library(xml2); library(rols)
-return_feature <- function(feature, species, remote=FALSE, dir=NULL, desc=FALSE, return.all=FALSE) {
+return_feature <- function(feature, species, keywords.all=TRUE, remote=FALSE, dir=NULL, desc=FALSE, return.all=FALSE) {
 
   options(stringsAsFactors=FALSE)
   dir.check <- !is.null(dir) 
@@ -216,11 +216,12 @@ return_feature <- function(feature, species, remote=FALSE, dir=NULL, desc=FALSE,
     tmp3 <- paste0(tmp2, '/SVG_tutorial_file-master/svg_repo')
     svgs <- list.files(path=tmp3, pattern='.svg$', full.names=TRUE, recursive=TRUE)
     df <- ftr.return(svgs=svgs, desc=desc)
+    svgs.na <- sapply(svgs, function(i) { str <- strsplit(i, '/')[[1]]; str[length(str)] })
+    svgs1 <- list.files(path=dir, pattern='.svg$', full.names=TRUE)
+    svgs.na1 <- list.files(path=dir, pattern='.svg$', full.names=FALSE) 
     if (return.all==TRUE) { 
 
-      svgs.na <- sapply(svgs, function(i) { str <- strsplit(i, '/')[[1]]; str[length(str)] })
-      svgs1 <- list.files(path=dir, pattern='.svg$', full.names=TRUE)
-      svgs.na1 <- list.files(path=dir, pattern='.svg$', full.names=FALSE)
+
       svgs1.rm <- svgs1[svgs.na1 %in% svgs.na] 
       cat(paste0('Overwriting: ', svgs1.rm, '\n')); file.remove(svgs1.rm)   
       # "file.copy" does not overwrite.
@@ -237,27 +238,36 @@ return_feature <- function(feature, species, remote=FALSE, dir=NULL, desc=FALSE,
   }
   
   sp <- gsub(' |_|\\.|-|;|,', '|', species); ft <- gsub(' |_|\\.|-|;|,', '|', feature)
-  sp <- strsplit(sp, '\\|')[[1]]; ft <- strsplit(ft, '\\|')[[1]]
-  df.idx <- NULL; for (i in sp) {
+  
+  if (keywords.all==TRUE) {
 
-   idx <- grepl(i, df$SVG, ignore.case=TRUE); df.idx <- cbind(df.idx, idx)
+    sp <- strsplit(sp, '\\|')[[1]]; ft <- strsplit(ft, '\\|')[[1]]
+    df.idx <- NULL; for (i in sp) {
 
-  } 
-  for (i in ft) {
+     idx <- grepl(i, df$SVG, ignore.case=TRUE); df.idx <- cbind(df.idx, idx)
 
-   idx <- grepl(i, df$feature, ignore.case=TRUE); df.idx <- cbind(df.idx, idx)
+    } 
+    for (i in ft) {
 
-  } 
-  w <- which(rowSums(df.idx)==ncol(df.idx))
-  df1 <- df[w, ]; rownames(df1) <- NULL
+     idx <- grepl(i, df$feature, ignore.case=TRUE); df.idx <- cbind(df.idx, idx)
+
+    } 
+    w <- which(rowSums(df.idx)==ncol(df.idx))
+    
+  } else {
+
+    w <- grepl(sp, df$SVG, ignore.case=TRUE) & grepl(ft, df$feature, ignore.case=TRUE)
+
+  }; df1 <- df[w, ]; rownames(df1) <- NULL
   
   if (remote==TRUE) {
 
     svgs.cp <- svgs[svgs.na %in% df1$SVG]
     svgs.rm <- svgs1[svgs.na1 %in% df1$SVG]
     sapply(svgs.cp, function (i) file.copy(i, dir))
-
-  }; unlink(tmp, recursive=TRUE); return(df1)
+    if (dir.exists(tmp)) unlink(tmp, recursive=TRUE)
+　　
+  }; return(df1)
 
 }
 
