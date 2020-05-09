@@ -72,7 +72,7 @@ Select "Edit paths by nodes (F2)" on the left tool bar, and draw a rectangle ove
 
   <p/><center><img src="image/cursor_edit.png" width="30%" hspace=20><img src="image/draw_rec.png" width="30%" hspace=20><img src="image/node_corner.png" width="30%"></center><p/>  
 
-Drag nodes and edges to align the new polygon with template polygon. On the fill and stroke panel, under "Fill" tab, select "Flat color" and adjust the colors to label the new polygon. Then the first polygon is made successfully.   
+Drag nodes and edges to align the new polygon with template polygon. On the fill and stroke panel, under "Fill" tab, select "Flat color" and adjust the colour scales to label the new polygon. Then the first polygon is made successfully.   
 
   <p/><center><img src="image/align.png" width="30%" hspace=20><img src="image/flat.png" width="30%" hspace=20><img src="image/first_polygon.png" width="30%"></center><p/>  
 
@@ -119,11 +119,11 @@ The exported SVG image "root_gimp.svg" is accessible [here](https://github.com/j
 
 ### Edit SVG image in Inkscape
 
-Open the exported SVG image in Inkscape. Under "Object" tab at the top, select "Fill and Stroke...". First click the SVG image and then adjust colours to fill it by using "Flat color" under "Fill" tab. 
+Open the exported SVG image in Inkscape. Under "Object" tab at the top, select "Fill and Stroke...". First click the image, then select "Flat color" under "Fill" tab. Adjust colour scales to fill all shapes.   
 
   <p/><center><img src="image/click_image.png" width="30%" hspace=10><img src="image/fill.png" width="30%" hspace=10><img src="image/fill1.png" width="30%"></center><p/>  
 
-The all paths in SVG image generated in GIMP are combined as a whole. In order to separate the paths, first click the image then select "Break Apart" under the "Path" tab on the top. Now the paths are separated (i.e. polygons are separated), but the outlines of polygons are not stroked. Thus use "Ctrl+A" to select all polygons, and on the fill and stroke panel select "Flat color" under "Stroke paint" tab, and set a number under "Stroke style" tab (1.333 px).   
+All the paths in SVG image generated in GIMP are combined as a whole. In order to separate the paths, first click the image then select "Break Apart" under the "Path" tab on the top. Now the paths/shapes are separated, but the outlines of shapes are not stroked. Thus use "Ctrl+A" to select all polygons, on the fill and stroke panel select "Flat color" under "Stroke paint" tab, and set a number under "Stroke style" tab (e.g. 1.333 px).   
 
   <p/><center><img src="image/break.png" width="30%" hspace=10><img src="image/stroke_fill.png" width="30%" hspace=10><img src="image/stroke_style1.png" width="30%"></center><p/>  
 
@@ -131,7 +131,7 @@ Click the white area to unselect the whole image. Press "+" key to zoom in and t
 
   <p/><center><img src="image/delete.png" width="30%" hspace=10><img src="image/delete1.png" width="30%" hspace=10><img src="image/after_delete.png" width="30%"></center><p/>  
 
-Use "Ctrl+A" to select all polygons. Click "No paint" under "Fill" tab on the fill and stroke panel. Click the white area to unselect the whole image. The blank SVG image is ready to format with the data matrix.  
+Use "Ctrl+A" to select all polygons. Click "No paint" under "Fill" tab on the fill and stroke panel. Click the white area to unselect the whole image. The blank SVG image is ready to format with the data.  
 
   <p/><center><img src="image/no_paint.png" width="30%" hspace=10><img src="image/blank.png" width="30%"></center><p/>  
 

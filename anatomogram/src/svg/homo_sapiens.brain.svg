@@ -28,17 +28,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4.5790467"
-     inkscape:cx="80.078357"
+     inkscape:zoom="3.237875"
+     inkscape:cx="32.008582"
      inkscape:cy="38.230147"
      inkscape:document-units="px"
-     inkscape:current-layer="LAYER_EFO"
+     inkscape:current-layer="LAYER_OUTLINE"
      showgrid="false"
-     inkscape:window-width="1533"
-     inkscape:window-height="986"
-     inkscape:window-x="75"
-     inkscape:window-y="34"
-     inkscape:window-maximized="0"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
@@ -89,9 +89,9 @@
          sodipodi:nodetypes="scsscsscsccsssssscsscccsccssccsccccscscccscssccscccscsccsssccssccscsscsscsssssccccccscccscssssccscscscscssccscscssccscscsscssscssssscsscsscscscccsscccsssscccssccscssscscsscssssccccsssccssssssscccscsssssscscccccscsscsscccsccscccscsscccsscccsssccccccscsssccccsccsscccssssscssccscssssscsccscsccccsscccsccscccsccscccccccscccc" />
     </g>
     <a
-       transform="matrix(1.8126424,0,0,1.8126424,-157.6599,19.709863)"
        id="a4174"
-       xlink:href="https://www.ebi.ac.uk/gxa/licence.html">
+       xlink:href="https://www.ebi.ac.uk/gxa/licence.html"
+       transform="matrix(1.8126424,0,0,1.8126424,-157.6599,19.709863)">
       <g
          id="g3"
          transform="matrix(0.07645089,0,0,0.07645089,123.6957,51.617633)">
