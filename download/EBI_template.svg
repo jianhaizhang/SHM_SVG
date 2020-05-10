@@ -29,13 +29,13 @@
                            inkscape:window-height="1056"
                            id="namedview27"
                            showgrid="false"
-                           inkscape:zoom="34.883995"
-                           inkscape:cx="25.063635"
-                           inkscape:cy="6.6506142"
+                           inkscape:zoom="17.441998"
+                           inkscape:cx="8.766763"
+                           inkscape:cy="14.677218"
                            inkscape:window-x="65"
                            inkscape:window-y="24"
                            inkscape:window-maximized="1"
-                           inkscape:current-layer="LAYER_OUTLINE" />
+                           inkscape:current-layer="svg" />
              <defs
                            id="defs4" />
              <metadata
@@ -79,9 +79,4 @@
                                        </g>
                           </a>
              </g>
-             <g
-                           transform="scale(0.29153969)"
-                           id="LAYER_EFO"
-                           inkscape:label="EFO"
-                           inkscape:groupmode="layer" />
 </svg>
