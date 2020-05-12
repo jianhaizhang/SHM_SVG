@@ -32,190 +32,426 @@ library(knitr); opts_chunk$set(message=FALSE, warning=FALSE)
 
 # Introduction
 
-The rapid advance in high-throughput biotechnology (e.g. next-generation sequencing, microarray) has generated a large amount of biological data. Accordingly, tools are developed over time to visualise these data, such as eFP [@Winter2007-bq], ePlant [@Waese2017-fx], gganatogram [@Maag2018-gi], brainR [@Muschelli2014-av], etc. These tools map the gene expression data onto a pre-defined tissue image where the data are measured. The great feature is that they display the data intuitively and interactively and therefore could promote hypothesis generation. However, the visualisation is based on data and image pre-configured by developers. Therefore, users have difficuty in displaying their custom data. To address this issue, we developed the R/Bioconductor package spatialHeatmap. For the usage of this package, refer to the [vignette](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
+## The *spatialHeatmap* Package
 
-Spatial heatmap plotting requires a pair of formatted data matrix and SVG image. To make it user-friendly, an [SVG repository](#repo) is developed, where users can download SVG images of interest. If the target SVG image is not available in this repository, users should make a custom SVG image. This tutorial explains the detailed process of making SVG images. To reproduce the results in this tutorial, all the used files are available to [download](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download).  
+The *spatialHeatmap* package provides functionalities for visualizing cell-, tissue- and organ-specific data of biological assays by coloring the corresponding spatial features defined in anatomical images according to a numeric color key. The color scheme used to represent the assay values can be customized by the user. This core functionality is called a *spatial heatmap* plot. It is enhanced with nearest neighbor visualization tools for groups of measured items (*e.g.* gene modules) sharing related abundance profiles, including matrix heatmaps combined with hierarchical clustering dendrograms and network representations.  
 
-# SVG Repository {#repo} 
+Related software tools for biological applications in this field are largely based on pure web applications [@Winter2007-bq; @Waese2017-fx] or local tools [@Maag2018-gi; @Muschelli2014-av] that typically lack customization functionalities. These restrictions limit users to utilizing pre-existing expression data and/or fixed sets of anatomical image collections. To close this gap for biological use cases, we have developed *spatialHeatmap* as a generic R/Bioconductor package for plotting quantitative values onto any type of spatially mapped images in a programmable environment and/or in an intuitive to use graphical user interface (GUI) application. For details, refer to the package [vignette](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
 
-To make it user-friendly, an [SVG repository](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/svg_repo/ebi_trans) across different species is created, where more SVG images will be added in future. These SVG templates are modified from [EBI Gene Expression Group](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg) to be compatible with spatialHeatmap. 
+## Tutorial Overview
 
-SVG images in the repository are all configured. If the SVG image of interest is available in this repository, users only need to download it (click an image, mouse over the image and right click, then select "Save image as…") and [set tissue ids](#set_id).  
+To plot spatial heatmaps, a pair of formatted data and aSVG (see [aSVG](#repo) below) image are required. The latter can come from the [EBI aSVG repository](#repo) or created by users. If the target aSVG image is not available in this repository, users should make a custom aSVG image. This tutorial explains the detailed process of making aSVG images. To reproduce the results in this tutorial, all the used files are available to [download](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download).   
 
-If no SVG template is of interest in this repository, users can follow the step-by-step SVG tutorial below to create their custom SVG images. 
+This tutorial first introduces the [EBI aSVG repository](#repo). Second, three ways of making SVG shapes in [Inkscape](https://inkscape.org/) are presented. Third, the requirements on data format are explained. The *spatialHeatmap* package is able to work with EBI aSVGs directly. However, for the purpose of plotting spatial heatmaps there are unnecessary format requirements on these aSVGs, thus in the fourth section the simplified aSVG format is presented. The fifth section illustrates conversion from the simplified aSVG format to the advanced EBI aSVG format. If users make custom aSVGs only for their own use, the simplified format is recommended, since it is easier and time-saving. If they want to share with other EBI users they should follow the advanced format. Lastly, spatial heatmaps are demonstrated on the aSVG created in this tutorial.  
 
+# Getting Started  
+
+## Installation  
+
+The `spatialHeatmap` package should be installed from an R (version $\ge$ 3.6) session with the `BiocManager::install` command.  
+
+```{r, eval=FALSE, echo=TRUE, warnings=FALSE} 
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("spatialHeatmap")
+
+```
+
+## Load Packages and Documentation
+
+Next, the packages required for running the sample code in this vignette need to be loaded.  
+
+```{r, eval=TRUE, echo=TRUE, warnings=FALSE}
+
+library(spatialHeatmap); library(SummarizedExperiment); library(GEOquery)
+
+```
+
+The following lists the vignette(s) of this package in an HTML browser. Clicking the corresponding name will open this vignette. 
+
+```{r, eval=FALSE, echo=TRUE, warnings=FALSE}
+
+browseVignettes('spatialHeatmap')
+
+```
+
+
+# EBI aSVG Repository {#repo} 
+
+To assign colors to specific features in spatial heatmaps, *annotated SVG* (aSVG) files are used where the shapes of interest are labeled according to certain conventions so that they can be addressed and colored programmatically. The [EBI aSVG repository](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg) is a public repository and covers a wide range of organisms. These SVGs are well-annotated and can be used in *spatialHeatmap* directly. If there is no target aSVGs in this repository, the following sections should be followed to make custom aSVGs.    
 
 # Make SVG Images 
 
-To make SVG images, a PNG image with defined tissues and the SVG editor [Inkscape](https://inkscape.org/) are required. The image editor [GIMP](https://www.gimp.org/) can be used if the tissue outlines in the PNG image are clear. Inkscape is used to draw the SVG image with the PNG image as a template, and format the SVG image in accordance with the data matrix. The values in data matrix are used to colour different tissues in spatial heatmaps. GIMP could be used to automatically extract polygons for the SVG image.  
+To make SVG images, a PNG image with defined tissues and the SVG editor [Inkscape](https://inkscape.org/) are required. The image editor [GIMP](https://www.gimp.org/) can be used if the tissue outlines in the PNG image are clear. Inkscape is used to draw the SVG image with the PNG image as a template, and annotate the SVG image in accordance with the data. The values in data are used to color different tissues in spatial heatmaps. GIMP could be used to automatically extract shapes for the SVG image.  
 
-There are 3 different options to make SVG images: Draw Over Template Polygons, Use Regular Shapes, Use GIMP. If tissues in the template image have unclear outlines, the first 2 options have to be used, as GIMP is applicable to tissues with clear outlines.  
+There are 3 different options to make SVG images: Draw Over Template Shapes, Use Regular Shapes, Use GIMP. If tissues in the template image have unclear outlines, the first 2 options have to be used, as GIMP is applicable to tissues with clear outlines.  
 
-## Draw Over Template Polygons
+## Draw Over Template Shapes {#draw}
 
-Download the PNG image [root.png](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (@Mustroph2009-nu, click the image, click "Download", right click, and select "Save image as…") and open it in Inkscape. Select "Draw Bezier curves and straight lines (shift+F6)" on the left tool bar.   
+Download the PNG image [root.png](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (@Mustroph2009-nu, click the image, click 'Download', right click, and select "Save image as…") and open it in Inkscape. Select 'Draw Bezier curves and straight lines (shift+F6)' on the left tool bar.   
   <p/><center><img src="image/open.png" width="30%" hspace=20><img src="image/draw_line_tool.png" width="30%"></center><p/>  
 
-Select "Fill and Stroke..." under "Object" tab on the top. On the right panel "Fill and Stroke (Shift+Ctrl+F)", set "Stroke style" 3.000 px and press "Enter" key. 
+Select 'Fill and Stroke...' under 'Object' tab on the top. On the right panel 'Fill and Stroke (Shift+Ctrl+F)', set 'Stroke style' 3.000 px and press 'Enter' key. 
 
   <p/><center><img src="image/top_fill_stroke.png" width="30%" hspace=20><img src="image/stroke_style.png" width="30%"></center><p/>  
 
-Press "+" key to zoom in and select a polygon to start. Left click at differencet corners of the polygon to draw an outline. At last, click at the first corner to seal the outline.  
+Press '+' key to zoom in and select a shape to start. Click at differencet corners of the shape to draw an outline. At last, click at the first corner to seal the outline.  
 
   <p/><center><img src="image/draw.png" width="30%" hspace=20><img src="image/seal.png" width="30%" hspace=20><img src="image/seal_polygon.png" width="30%"></center><p/>  
 
-If the new polygon is filled with a colour, click "No paint" under the "Fill" tab on the panel "Fill and Stroke (Shift+Ctrl+F)". Then a new sealed transparent polygon is drawn.  
+If the new shape is filled with a color, click 'No paint' under the 'Fill' tab on the panel 'Fill and Stroke (Shift+Ctrl+F)'. Then a new sealed transparent shape is completed.  
 
   <p/><center><img src="image/no_paint.png" width="30%" hspace=20><img src="image/new_polygon.png" width="30%"></center><p/>  
 
-Select "Edit paths by nodes (F2)" on the left tool bar, and draw a rectangle over the new polygon. Select "Make selected nodes corner" on the top.  
+Select 'Edit paths by nodes (F2)' on the left tool bar, and draw a rectangle over the new shape. Select 'Make selected nodes corner' on the top.  
 
   <p/><center><img src="image/cursor_edit.png" width="30%" hspace=20><img src="image/draw_rec.png" width="30%" hspace=20><img src="image/node_corner.png" width="30%"></center><p/>  
 
-Drag nodes and edges to align the new polygon with template polygon. On the fill and stroke panel, under "Fill" tab, select "Flat color" and adjust the colour scales to label the new polygon. Then the first polygon is made successfully.   
+Drag nodes and edges to align the new shape with template shape. On the fill and stroke panel, under 'Fill' tab, select 'Flat color' and adjust the color scales to label the new shape. Then the first shape is made successfully.   
 
   <p/><center><img src="image/align.png" width="30%" hspace=20><img src="image/flat.png" width="30%" hspace=20><img src="image/first_polygon.png" width="30%"></center><p/>  
 
 ## Use Regular Shapes 
 
-If the template polygons are similar to regular shapes such as rectangles, circles. The regular shapes can be used to make new polygons.
+If the template shapes are similar to regular shapes such as rectangles, circles. The regular shapes can be used to make new shapes.
 
-Select "Create rectangles and squares (F4)" on the left, and draw a rectangle over a polygon template. Convert this object to path by selecting "Object to Path" under "Path" tab on the top.   
+Select 'Create rectangles and squares (F4)' on the left, and draw a rectangle over a shape template. Convert this object to path by selecting 'Object to Path' under 'Path' tab on the top.   
 
   <p/><center><img src="image/rec.png" width="30%" hspace=20><img src="image/draw_rec1.png" width="30%" hspace=20><img src="image/object2path.png" width="30%"></center><p/>  
 
-Click "No paint" under the "Fill" tab on the fill and stroke panel to make the rectangle transparent. Rotate the rectangle. Select "Edit paths by nodes (F2)" on the left tool bar. If necessary, add a node by double-clicking on an edge. Drag nodes and edges to align the rectangle with the underlying polygon template. 
+Click 'No paint' under the 'Fill' tab on the fill and stroke panel to make the rectangle transparent. Rotate the rectangle. Select 'Edit paths by nodes (F2)' on the left tool bar. If necessary, add a node by double-clicking on an edge. Drag nodes and edges to align the rectangle with the underlying shape template. 
   
   <p/><center><img src="image/no_paint.png" width="30%" hspace=20><img src="image/rotate.png" width="30%" hspace=20><img src="image/add_node.png" width="30%"></center><p/> 
 
-Select "Edit paths by nodes (F2)" on the left tool bar, and draw a rectangle over the new polygon. Select "Make selected nodes corner" on the top.  
+Select 'Edit paths by nodes (F2)' on the left tool bar, and draw a rectangle over the new shape. Select 'Make selected nodes corner' on the top.  
 
   <p/><center><img src="image/cursor_edit.png" width="30%" hspace=20><img src="image/draw_rec2.png" width="30%" hspace=20><img src="image/node_corner.png" width="30%"></center><p/>  
 
-Drag the handles at nodes to adjust edges for fine alignment. On the fill and stroke panel select "Flat color" under "Fill" tab to colour this new polygon. The second polygon is successfully made.   
+Drag the handles at nodes to adjust edges for fine alignment with the template shape. On the fill and stroke panel select 'Flat color' under 'Fill' tab to color this new shape. Then the new shape is successfully made.   
 
   <p/><center><img src="image/handle.png" width="30%" hspace=20><img src="image/second_polygon.png" width="30%"></center><p/>  
 
 
 ## Use GIMP
 
-If polygons in the template PNG image have clear outlines, the SVG image can be extracted with [GIMP](https://www.gimp.org/).  
+If shapes in the template PNG image have clear outlines, the SVG image can be extracted with [GIMP](https://www.gimp.org/), since unclear outlines would lead to messay SVG shapes.  
 
 ### Extract SVG image
 
-Open the PNG template in GIMP, and open "Paths" panel. Right click and select "By Color".  
+Open the PNG template in GIMP, and open 'Paths' panel. Right click and select 'By Color'.  
 
   <p/><center><img src="image/path.png" width="30%" hspace=10><img src="image/path_panel.png" width="40%" hspace=10><img src="image/by_color.png" width="30%"></center><p/>  
 
-Now the polygons can be selected by colors. For exmaple, clicking on a whilte polygon selects all polygons in white. Right click, select "To Path", then all the white polygons are extracted in the "Paths" panel. Similarly, extract the yellow polygons.  
+Now the shapes can be selected by colors. For exmaple, clicking on a whilte shape selects all shapes in white. Right click, select 'To Path', then all the white shapes are extracted to the 'Paths' panel. Similarly, extract the yellow shapes.  
 
   <p/><center><img src="image/to_path.png" width="30%" hspace=10><img src="image/to_path1.png" width="20%"></center><p/>  
 
-Click in front of each extracted polygons to show the eye symbol. Mouse over the extracted polygons, right click, select "Merge Visible Paths". After merged, export the paths as an SVG image (root_gimp.svg). Next, edit the exported SVG image in Inkscape.  
+Click in front of each extracted shapes to show the 'eye' icon. Mouse over the extracted shapes, right click, select 'Merge Visible Paths'. After merged, export the paths as an SVG image (root_gimp.svg). Next, edit the exported SVG image in Inkscape.  
 
   <p/><center><img src="image/eye.png" width="30%" hspace=10><img src="image/merge.png" width="30%" hspace=10><img src="image/export.png" width="30%"></center><p/>  
 
-The exported SVG image "root_gimp.svg" is accessible [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (hover over the image, right click, and select "Save image as…").  
+The exported SVG image `root_gimp.svg` is accessible [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (hover over the image, right click, and select 'Save image as…').  
 
-### Edit SVG image in Inkscape
+### Edit SVG Image in Inkscape
 
-Open the exported SVG image in Inkscape. Under "Object" tab at the top, select "Fill and Stroke...". First click the image, then select "Flat color" under "Fill" tab. Adjust colour scales to fill all shapes.   
+Open the exported SVG image in Inkscape. Under 'Object' tab at the top, select 'Fill and Stroke...'. First click the image, then select 'Flat color' under 'Fill' tab. Adjust color scales to fill the image.     
 
   <p/><center><img src="image/click_image.png" width="30%" hspace=10><img src="image/fill.png" width="30%" hspace=10><img src="image/fill1.png" width="30%"></center><p/>  
 
-All the paths in SVG image generated in GIMP are combined as a whole. In order to separate the paths, first click the image then select "Break Apart" under the "Path" tab on the top. Now the paths/shapes are separated, but the outlines of shapes are not stroked. Thus use "Ctrl+A" to select all polygons, on the fill and stroke panel select "Flat color" under "Stroke paint" tab, and set a number under "Stroke style" tab (e.g. 1.333 px).   
+All the paths in SVG image generated in GIMP are combined as a whole. In order to separate the paths, first click the image then click 'Break Apart' under the top 'Path' tab. Now the paths/shapes are separated, but the outlines of shapes are not stroked. Thus use 'Ctrl+A' to select all shapes, on the fill and stroke panel select 'Flat color' under 'Stroke paint' tab, and set a number under 'Stroke style' tab (e.g. 1.333 px).   
 
   <p/><center><img src="image/break.png" width="30%" hspace=10><img src="image/stroke_fill.png" width="30%" hspace=10><img src="image/stroke_style1.png" width="30%"></center><p/>  
 
-Click the white area to unselect the whole image. Press "+" key to zoom in and try to move different polygons and delete those unnecessary by pressing "Delete" key.  
+Click the white area to unselect the whole image. Press '+' key to zoom in, try to move different shapes, and delete those unnecessary by pressing 'Delete' key.  
 
   <p/><center><img src="image/delete.png" width="30%" hspace=10><img src="image/delete1.png" width="30%" hspace=10><img src="image/after_delete.png" width="30%"></center><p/>  
 
-Use "Ctrl+A" to select all polygons. Click "No paint" under "Fill" tab on the fill and stroke panel. Click the white area to unselect the whole image. The blank SVG image is ready to format with the data.  
+Use 'Ctrl+A' to select all shapes. Click 'No paint' under 'Fill' tab on the fill and stroke panel. Click the white area to unselect the whole image. The blank SVG image is ready to format with the data, which is downloadable [here](https://raw.githubusercontent.com/jianhaizhang/SVG_tutorial_file/master/download/root_gimp_blank.svg).    
 
   <p/><center><img src="image/no_paint.png" width="30%" hspace=10><img src="image/blank.png" width="30%"></center><p/>  
 
-# Format Data Matrix
+# Format the Data
 
-The formatting process of SVG image is in accordance with the data matrix. The data matrix with rows and columns being genes and sample/conditions respectively is formatted by a targets file (a dataframe of column metadata). The targets file is a data frame with at least 2 columns defining replicates of samples and conditions respectively.  
+The bridges between data and aSVG are the sample features. Only features having matching counterparts between data and aSVG are colored in the spatial heatmaps. Therefore, the formatting process of SVG image is in accordance with the data formatting. The accepted data classes include `vector`, `data frame`, or `SummarizedExperiment` (SE) [@SummarizedExperiment]. Formatting the data is essentially to define samples and/or conditions. In the following, data formatting is explained on SE, since this data class is widely used in biological omics analysis. Details on `vector` and `data frame` are presented in [Supplement](#sup).  
 
-**Requirements on the targets file**
 
-1. It is a data frame with at least 2 columns. The rows corresponds with columns in the data matrix.
- 
-2. The sample column specifies sample replicates. It is crucial that replicate names of the same sample must be identical.  
+SE applies to data involving many samples and conditions. The data matrix with rows and columns being genes and sample/conditions respectively is stored in the `assay` slot. The data formatting is essentially to make a targets file. It is a data frame and usually contains at least 2 columns defining replicates of samples and conditions respectively. The targets file is in the `colData` slot. In the `rowData` slot, a data frame of annotations for rows in `assay` is optionally added.  
 
-3. The condition column has the same requirement with the sample column.  
+The example data GSE14502 is from [GEO](https://www.ncbi.nlm.nih.gov/geo/). It is a microarray analysis on *Arabidopsis thaliana* root/shoot tissues under control and hypoxia [@Mustroph2009-nu], and is downloaded through GEOquery [@geo].  
 
-4. The name of sample and condition replicates should only consist of letters, digits, dots, single space, or single underscore.  
+Access the GEO dataset GSE14502 and convert it to `SummarizedExperiment`.  
 
-Table 1 [@Mustroph2009-nu] is the formatted targets file according to the above requirements and will be used to format this SVG image, which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (click the file, click "Raw", right click, and select "Save as…").  
-
-It is critical that the replicate names of same sample of condition must be identical. As shown in Table 1, there are 2 samples "root_pGL2", "root_pCO2", and each sample has identical replicate names, which is true for the 2 conditions.  
-
-<a name='tar_sh'></a>
-```{r, eval=TRUE, echo=FALSE, warnings=FALSE}
-
-pa.sh <- system.file('extdata/shinyApp/example/target_arab.txt', package='spatialHeatmap')
-target.sh <- read.table(pa.sh, header=TRUE, row.names=1, sep='\t')
-df <- subset(target.sh, samples=='root_pGL2' |samples=='root_pCO2')[, 2:3]
-kable(df, caption='Table 1 Targets file (metadata of data matrix column) of the data matrix. Promoter pGL2, pCO2, pSCR, pWOL labels root atrichoblast epidermis, root cortex meristematic zone, root endodermis, root vasculature respectively. Only the first 2 are shown. ')
-
+```{r eval=TRUE, echo=TRUE, warnings=FALSE}
+gset <- getGEO("GSE14502", GSEMatrix=TRUE, getGPL=TRUE)[[1]]
+se.arab <- as(gset, "SummarizedExperiment")
 ```
 
-# Format SVG Image
+Use gene symbols to replace probes.   
 
-To plot spatial heatmaps successfully, the SVG image must be formatted according to the following requirements.  
+```{r eval=TRUE, echo=TRUE, warnings=FALSE}
+rownames(se.arab) <- make.names(rowData(se.arab)[, 'Gene.Symbol'])
+```
 
-**Requirements on SVG format**
+A slice of the data matrix in `assay` slot.  
 
-1. A path represents a shape. If a tissue consists of multiple paths and is expected to be colured in the spatial heatmap, all its paths must be grouped as a whole (labeled by tag "g"). The group id is the tissue id and the inside path ids are useless. A group should not include another group, which means all elements in a group should be single paths. However, if a multiple-path tissue is not expected to coloured in the spatial heatmap, there is no need to group them and the paths can keep random ids.
+```{r eval=TRUE, echo=TRUE, warnings=FALSE}
+assay(se.arab)[1:3, c(25:29, 36:39)]
+```
 
-2. If a tissue has only one path, it can stay as an individual path, no need to be formatted as a group. 
+A slice of the experiment design, which is stored in `colData` slot.    
 
-3. If a tissue is expected to be coloured in the spatial heatmaps, its "id" must be identical with corresponding tissue name from the targets file. It means even a difference of dot, space, underscore, uppercase, or lowercase matters.  
+```{r eval=TRUE, echo=TRUE, warnings=FALSE}
+colData(se.arab)[c(25:29, 36:39), 1:3]
+```
 
-4. All the tissues (groups and single paths) must be placed in another container group as a whole, and this group must be the last element in the "XML Editor".  
+The `title` column includes 'samples' and 'conditions', so it is used to make the targets file based on the following requirements.  
 
-The following section shows the process of formatting the SVG image.  
+1. It is a data frame and usually has at least one column of samples and one column of conditions. The rows correspond with columns in assay slot. If the condition column is not defined, the samples are assumped under same condition.
 
-**Group same tissues**  
+2. The sample column specifies sample replicates. It is crucial that replicate names of the same sample must be identical. Otherwise, they are treated as different samples. E.g. 'root_pGL2' and 'root_pCO2' in [Table 1](#tar_arab).  
 
-The same tissues in the SVG repository are already grouped. If the SVG image is made by following the above steps, same tissues should be grouped so as to be coloured in spatial heatmaps. Take the root_pGL2 as an example. Select polygons of the this sample by clicking polygon edge while pressing "Shift" key. Mouse over any edge of selected polygons, right click and select "Group".   
+3. The sample identifiers of interest must be identical with features of interest in aSVG respectively. It means even a dot, undescore, space, etc can make a difference and lead to target features not colored in spatial heatmaps. Since double underscore (_\_) is a reserved separator in *spatialHeatmap*, it cannot be used in sample or condition identifiers.
+
+4. The condition column has the same requirement with the sample column. E.g. 'control' and 'hypoxia' in [Table 1](#tar_arab).  
+
+The completed targets file is packaged in *spatialHeatmap*, and is also downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (click the file, click "Raw", right click, and select "Save as…"). Selected rows are shown in [Table 1](#tar_arab).   
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE}
+tar.arab <- system.file('extdata/shinyApp/example/target_arab.txt', package='spatialHeatmap')
+target.arab <- read.table(tar.arab, header=TRUE, row.names=1, sep='\t')
+```
+
+```{r eval=FALSE, echo=TRUE, warnings=FALSE}
+target.arab[c(25:29, 36:39), ]
+```
+
+<a name='tar_arab'></a>
+```{r, eval=TRUE, echo=FALSE, warnings=FALSE}
+df <- subset(target.arab, samples=='root_pGL2' |samples=='root_pCO2')[, 2:3]
+kable(df, caption='Table 1 Targets file. Promoter pGL2, pCO2, pSCR, pWOL labels root atrichoblast epidermis, root cortex meristematic zone, root endodermis, root vasculature respectively. Only the first 2 are shown. ')
+```
+
+Use the targets file to replace the data frame in `colData` slot.   
+
+```{r, eval=TRUE, echo=FALSE, warnings=FALSE}
+colData(se.arab) <- DataFrame(target.arab)
+```
+
+As pre-proccesing conventions, gene expressoin profiling data should be normalized, aggregated, and filtered. The dataset GSE14502 is already normalised by RMA [@affy], so the pro-processing only includes replicate aggregation and filtering.   
+
+The data is aggregated based on 'sample_\_condition' replicates internally, and a slice of the result is shown below.   
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+se.aggr.arab <- aggr_rep(data=se.arab, sam.factor='samples', con.factor='conditions', aggr='mean')
+assay(se.aggr.arab)[1:3, c(11:12, 16:17)]
+```
+
+Genes with expression values larger than 6 in at least 3% of all samples (pOA=c(0.03, 6)), and with coefficient of variance (CV) between 0.30 and 100 (CV=c(0.30, 100)) are retained.   
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+# Filter genes with low variance and low intensity.
+se.fil.arab <- filter_data(data=se.aggr.arab, sam.factor='samples', con.factor='conditions', pOA=c(0.03, 6), CV=c(0.30, 100), dir=NULL)
+```
+
+# Simplified aSVG Format
+
+If users make aSVGs only for their own use rather than sharing with other EBI users, the simplified format is recommended, since it is easier and time-saving.   
+
+## Requirements on Simplified aSVG Format
+
+1. A path represents a shape. If a tissue consists of multiple paths and is expected to be colored in the spatial heatmap, all its paths must be grouped as a whole (labeled by tag `g`). A group should not include another group, which means all elements in a group should be single paths. However, if a multiple-path tissue is not expected to be colored in the spatial heatmap, there is no need to group them and the paths can keep random ids.
+
+2. If a tissue is expected to be colored in the spatial heatmaps, its `id` value must have an identical tissue counterpart in the data/targets file. It means even a difference of dot, space, underscore, uppercase, or lowercase matters. If a tissue is a group, the group `id` is considered while the inside path ids are useless.  
+
+3. In the end, all the tissues (groups and single paths) must be grouped together as a container group, and this large group must be the last element in the 'XML Editor'.  
+
+
+## Group Same Tissues
+
+In order to be colored in spatial heatmaps, tissues consisting of multiple shapes should be grouped. Take the `root_pGL2` as example. Select shapes of this tissue by clicking their edges while pressing 'Shift' key. Mouse over any edge of selected shapes, right click and select 'Group'.   
 
   <p/><center><img src="image/select.png" width="30%" hspace=10><img src="image/group.png" width="30%"></center><p/>  
 
-Click "Flat color" under the "Fill" tab on the fill and stroke panel, and use a colour to fill the grouped polygons.   
+Click 'Flat color' under the 'Fill' tab on the fill and stroke panel, and fill the grouped shapes with a preferred color.   
 
   <p/><center><img src="image/flat1.png" width="30%" hspace=10><img src="image/fill_group.png" width="30%"></center><p/>  
 
-<a name='set_id'></a>
-**Set tissue id**  
+## Set Tissue ID {#set_id}
   
-Under the "Edit" tab on the top, select "XML Editor...". Click the group to select it. On the "XML Editor (Shift+Ctrl+X)" panel, first click the id and type in "root_pGL2" then click "Set". It is critial that the id "root_pGL2" is identical with the corresponding tissue in the data matrix. After that, the first group is done.  
+Under the 'Edit' tab on the top, select 'XML Editor...'. Click the group to select it. On the 'XML Editor (Shift+Ctrl+X)' panel, first click the 'id' and type in `root_pGL2` then click 'Set'. It is critial that the id 'root_pGL2' has identical tissue counterpart in the data. Otherwise, this tissue will not be colored. After that, the first group is done.  
 
   <p/><center><img src="image/edit.png" width="30%" hspace=10><img src="image/xml_tab.png" width="30%" hspace=10><img src="image/set_id.png" width="30%"></center><p/>  
 
-Similarly, group and set id for root_pCO2, root_pSCR, root_pWOL respectively. When group the small vasculature polygons in the center, a shortcut is to draw a rectangle over them to select all rather than click each individually. Note if a tissue sample contains only one polygon, then no need to group it, but the id should be identical with corresponding sample in the targets file in order to colour it in spatial heatmaps.  
+Similarly, group and set id for `root_pCO2`, `root_pSCR`, `root_pWOL` respectively. When group the small vasculature shapes in the center, a shortcut is to draw a rectangle over them to select all rather than clicking each individually. Note if a tissue sample contains only one shape, there is no need to group it, but the id should be identical with corresponding sample in the data in order to be colored in spatial heatmaps.  
 
   <p/><center><img src="image/final.png" width="30%"></center><p/>
 
-Brown, blue, orange, purple labels pGL2, pCO2, pSCR, pWOL respectively. The blank polygons have random ids and will not be coloured in the spatial heatmap. 
+Brown, blue, orange, purple labels `root_pGL2`, `root_pCO2`, `root_pSCR`, `root_pWOL` respectively. The blank shapes have random ids and will not be colored in the spatial heatmap.   
 
-**Container group**  
+## Container Group
   
-At last, it is required to group all groups and independent paths as a container group. To do so, use "Ctrl+A" to select all, mouse over the polygons, right click, and click group. It is optional to change the container group id. Note this step is already done in SVG images from the repository.   
+At last, it is required to group all tissues (groups and independent paths) as a container group. To do so, use 'Ctrl+A' to select all, mouse over the selection, right click, and click group. Note it is optional to set a specific `id` for this container group.  
 
   <p/><center><img src="image/group_all.png" width="30%" hspace=10><img src="image/set_container.png" width="30%"><p/>  
 
-It is crucial that this container group must be the last element on the "XML Editor".   
+It is crucial that this container group must be the last element on the 'XML Editor'.   
 
   <p/><center><img src="image/last_element.png" width="30%" hspace=10><img src="image/last_element1.png" width="30%"></center><p/>  
 
-By now, the SVG image is done. Save the formatted SVG image as "root.svg", which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the SVG file name ends with ".svg" and the front should only consist of letters, digits, dots, or underscores. E.g. root(1).svg is not acceptable.   
+By now, the simplified aSVG image is done. Save it as 'root_cross_simple.svg', which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the aSVG file name ends with `.svg` and the front should only consist of letters, digits, dots, or underscores. E.g. root_cross_simple(1).svg is not acceptable.   
+
+# Advanced aSVG Format
+
+To work with the [Expression Atlas Anatomogram](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg), the advanced aSVG format is required, and the specific requirements are listed at the bottom of this [page](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg). The following sections illustrate the transition from the simplified format to advanced format.   
+
+## Pre-set SVG attributes
+
+Download the EBI SVG template [`EBI_template.svg`](https://github.com/jianhaizhang/SVG_tutorial_file/blob/63dc4bbb1269cdd3b4fb138ab56f389aca16a483/download/EBI_template.svg), which is made from the [Expression Atlas Anatomogram](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg) and open it in Inkscape. It contains 2 layers `LAYER_OUTLINE` and `LAYER_EFO`. The former is expected to store organism outline shapes while the latter to store tissue shapes. As a template, both layers are empty except that `LAYER_OUTLINE` contains a green icon, which links to [Expression Atlas Licence](https://www.ebi.ac.uk/gxa/licence.html).  
+
+  <p/><center><img src="image/save.png" width="30%" hspace=10><img src="image/ebi_template.png" width="30%" hspace=10><img src="image/ebi_layer.png" width="20%"></center><p/>  
 
 
+Copy `height`, `width`, `viewBox` values in top `<svg ...>` tag from `root_cross_simple.svg` to `EBI_template.svg` respectively.  
 
+  <p/><center><img src="image/view_box.png" width="40%" hspace=10><img src="image/copy_svg_attr.png" width="40%" hspace=0></center><p/>  
+
+The green icon might be shrunk. To resize the icon, select it, click the lock on the top toolbar, which maintains the aspect ratio, and increase the height (H) or width (W). Move the icon to the bottom left corner.  
+
+  <p/><center><img src="image/icon.png" width="25%" hspace=10><img src="image/lock.png" width="40%" hspace=10><img src="image/icon1.png" width="40%" hspace=0></center><p/>  
+
+## Copy Tissues to The Tissue Layer
+
+In `root_cross_simple.svg`, ungroup (Ctrl+Shift+G) the container group, select all shapes, and copy all.   
+
+  <p/><center><img src="image/ungroup_container.png" width="60%" hspace=0></center><p/>  
+
+In `EBI_template.svg`, open layer panel (Ctrl+Shift+L) and make sure the 'unlock' icon is in front of 'EFO' and 'Outline'. Click the 'EFO' layer, and paste all tissue shapes from `root_cross_simple.svg`. Then these shapes are inside the 'EFO' layer.  
+
+  <p/><center><img src="image/layer.png" width="30%" hspace=10><img src="image/paste.png" width="40%" hspace=10><img src="image/paste1.png" width="30%" hspace=0></center><p/>  
+
+## Annotate Tissues
+
+The tissues in 'EFO' layer should be annotated, which includes ontology ids and tissue identifiers. Take the `root_pSCR` (root endodermis) tissue for example. Click the tissue in 'XML Editor', and click 'New element node' on the top. Type in 'svg:title' and click 'Create'. Then a `title` node is created at the bottom of `root_pSCR`. 
+
+  <p/><center><img src="image/title.png" width="30%" hspace=10><img src="image/title1.png" width="30%" hspace=10><img src="image/title2.png" width="40%" hspace=0></center><p/>  
+
+Click the `title` node and click 'New text node' at the top. Then an empty text node is created inside the `title` node. Click the text node and type in 'root_pSCR' on the right.  
+
+  <p/><center><img src="image/title3.png" width="30%" hspace=10><img src="image/click_text.png" width="25%" hspace=10><img src="image/add_text.png" width="30%" hspace=0></center><p/>  
+
+Set title id as `root_pSCR`, then the title is done.  
+
+  <p/><center><img src="image/title_id.png" width="30%" hspace=10><img src="image/title_done.png" width="30%" hspace=0></center><p/>  
+
+Look up for 'root endodermis' that `root_pSCR` stands for in [Ontology Lookup Service](https://www.ebi.ac.uk/ols/index), and set the `root_pSCR` group id as `PO:0005059`. Then the annotation of `root_pSCR` is done.   
+
+  <p/><center><img src="image/ont.png" width="50%" hspace=10><img src="image/ont1.png" width="30%" hspace=0></center><p/>  
+
+Annotate other tissues in the same way.  
+
+
+## Outline Shapes
+
+If there are outline shapes, they should be placed in the 'LAYER_OUTLINE' layer. For illustration purpose, a root outline is created.   
+
+Click 'Outline' in the layer panel, and draw an outline as explained [above](#draw). Then the outline shape is created in the 'Outline' layer.  
+
+  <p/><center><img src="image/outline_layer.png" width="20%" hspace=10><img src="image/outline1.png" width="40%" hspace=10><img src="image/outline2.png" width="30%" hspace=0></center><p/>  
+
+## Absolute Path Position
+
+All the paths need to use absolute positions. To do so, click 'Preferences...' under 'Edit' tab. Go to 'Input/Output' → 'SVG Output' → 'Path data' → 'Path string format', and select 'Absolute'.  
+
+  <p/><center><img src="image/prefer.png" width="40%" hspace=10><img src="image/abs.png" width="40%" hspace=0></center><p/>  
+
+This setting only affects newly created paths. To trigger the effcts on existing paths, click 'Select All in All Layers' under the 'Edit' tab, and use the arrow key to nudge the selection, e.g. one step forward and one step backward. Then all the paths are rewritten and absolutely positioned. The absolut position is exemplified by the capital letters in the 'd' attribute of a path.  
+
+  <p/><center><img src="image/select_all.png" width="30%" hspace=10><img src="image/abs1.png" width="30%" hspace=0></center><p/>  
+
+## Resize Page
+
+To ensure that the correct height and width are set, go to 'Document Properties...' under 'File ' tab, and select 'Custom size' under 'Page' tab, then set 'Units' to 'px' and click on 'Resize page to drawing or selection'.  
+
+  <p/><center><img src="image/property.png" width="30%" hspace=10><img src="image/property1.png" width="40%" hspace=0></center><p/>  
+
+## Tissue Shape Style
+
+According to EBI guidlines, all tissue shapes ('EFO' layer) are expected to have `style="fill:none; stroke:none"`. To do so, click on the 'EFO' in layer panel, select all tissue shapes (Ctrl+A), then click 'No paint' under both 'Fill' and 'Stroke paint' in 'XML Editor' panel. Then all the tissue shapes are transparent.  
+
+  <p/><center><img src="image/layer.png" width="30%" hspace=10><img src="image/no_paint2.png" width="30%" hspace=10><img src="image/no_paint3.png" width="30%" hspace=10><img src="image/only_outline.png" width="40%" hspace=0></center><p/>  
+
+The EBI SVG follows the naming scheme '\<species\>[.view].svg', so this image can be saved as 'arabidopsis_thaliana.root_cross.svg', which is downloadable [here](https://raw.githubusercontent.com/jianhaizhang/SVG_tutorial_file/master/download/arabidopsis_thaliana.root_cross.svg).   
+
+# Spatial Heatmap
+
+Both 'root_cross_simple.svg' and 'arabidopsis_thaliana.root_cross.svg' are ready to use for plotting spatial heatmaps. The latter is packaged in `spatialHeatmap` and is accessed below.   
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE}
+svg.root <- system.file('extdata/shinyApp/example/arabidopsis_thaliana.root_cross.svg', package='spatialHeatmap')
+```
+
+Plot spatial heatmaps on gene `HRE2`. In Figure 1, it is manifest that gene `HRE2` is showing higher expression level in `hypoxia` than in `control`, and thus might play an interesting role in hypoxia resistance.     
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE, fig.align="center", fig.cap=('Figure 1 Spatial Heatmaps. The matching tissues between data and aSVG are colored in the middle spatial heatmaps. On the right is the legend plot, where matching tissues are labeled.'), out.width="100%"}
+spatial_hm(svg.path=svg.root, data=se.fil.arab, sam.factor='samples', con.factor='conditions', ID=c("HRE2"), height=0.4, legend.nrow=3, legend.r=1.3, legend.key.size=0.3)
+```
+
+# Supplement
+
+This section presents details of data formatting on `vector` and `data frame`.  
+
+## Vector
+
+The data class `vector` applies to several numeric values measured for a single item (*e.g.* gene). If one or more conditions are provided, the samples and conditions should be connected by double undescore, i.e. in the form of 'sample_\_condition'. Since '_\_' is a reserved separator, the naming scheme of 'sample' and 'condition' should not use it. If no conditions are provided, all the samples are assumed to have same condition.   
+
+Take the samples and conditions in [Table 1](#tar_arab) for example. The two samples are 'root_pGL2' and 'root_pCO2' and two conditions are 'control' and 'hypoxia'. Assume the two samples have matching counterparts in the aSVG. Since there are two conditions for each sample, the `vector` should contain four target values. The following code generates five random values so that the first four are the target values while the last one is from a third assumed sample that has no counterparts in the aSVG.  
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+# Random numeric values.
+vec <- sample(x=1:100, size=5)
+```
+
+Name the first 4 values with the scheme 'sample_\_condition', and last with a random name `notMapped`. Note each value has a unique name.  
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+# Give unique names to random values.
+names(vec) <- c('root_pGL2__control', 'root_pGL2__hypoxia', 'root_pCO2__control', 'root_pCO2__hypoxia', 'notMapped')
+vec
+```
+
+## Data Frame
+
+The class `data frame` applies to more items (e.g. genes) assayed in several samples and/or conditions (e.g. 2 samples under 2 conditions). Columns and rows are samples/conditions and assayed items respectively. Similarly, if one or more conditions are provided, the column names should follow the scheme 'sample_\_conditio'. If no conditions are provided, all the samples are assumed to have same condition.  
+
+Take the same samples and conditions in the `vector` case as example. Make a numeric data frame of 20 rows and 5 columns.   
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+# Make a numeric data frame.
+df.test <- data.frame(matrix(sample(x=1:1000, size=100), nrow=20))
+```
+
+Name columns with the names in above `vector` and rows with 20 genes (gene1, gene2, ..., gene20).  
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+# Name the columns.
+colnames(df.test) <- names(vec)
+# Name the rows.
+rownames(df.test) <- paste0('gene', 1:20)
+# A slice of the data frame.
+df.test[1:3, ]
+```
+
+In the downstream interactive network (refer to the package [vignette](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html)), if users want to have a gene annotation by mousing over a node, a column of gene annotation can be appended to the data frame. For example, the 20 genes are annotated as ann1, ann2, ..., ann20.   
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+df.test$ann <- paste0('ann', 1:20)
+df.test[1:3, ]
+```
+
+```{r eval=TRUE, echo=TRUE, warnings=FALSE }
+sessionInfo()
+```
 
 # Reference
 
