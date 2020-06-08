@@ -32,17 +32,17 @@ library(knitr); opts_chunk$set(message=FALSE, warning=FALSE)
 
 # Introduction
 
-## The *spatialHeatmap* Package
+## The `spatialHeatmap` Package
 
-The *spatialHeatmap* package provides functionalities for visualizing cell-, tissue- and organ-specific data of biological assays by coloring the corresponding spatial features defined in anatomical images according to a numeric color key. The color scheme used to represent the assay values can be customized by the user. This core functionality is called a *spatial heatmap* plot. It is enhanced with nearest neighbor visualization tools for groups of measured items (*e.g.* gene modules) sharing related abundance profiles, including matrix heatmaps combined with hierarchical clustering dendrograms and network representations.  
+The `spatialHeatmap` package provides functionalities for visualizing cell-, tissue- and organ-specific data of biological assays by coloring the corresponding spatial features defined in anatomical images according to a numeric color key. The color scheme used to represent the assay values can be customized by the user. This core functionality is called a *spatial heatmap* plot. It is enhanced with nearest neighbor visualization tools for groups of measured items (*e.g.* gene modules) sharing related abundance profiles, including matrix heatmaps combined with hierarchical clustering dendrograms and network representations.  
 
-Related software tools for biological applications in this field are largely based on pure web applications [@Winter2007-bq; @Waese2017-fx] or local tools [@Maag2018-gi; @Muschelli2014-av] that typically lack customization functionalities. These restrictions limit users to utilizing pre-existing expression data and/or fixed sets of anatomical image collections. To close this gap for biological use cases, we have developed *spatialHeatmap* as a generic R/Bioconductor package for plotting quantitative values onto any type of spatially mapped images in a programmable environment and/or in an intuitive to use graphical user interface (GUI) application. For details, refer to the package [vignette](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
+Related software tools for biological applications in this field are largely based on pure web applications [@Winter2007-bq; @Waese2017-fx] or local tools [@Maag2018-gi; @Muschelli2014-av] that typically lack customization functionalities. These restrictions limit users to utilizing pre-existing expression data and/or fixed sets of anatomical image collections. To close this gap for biological use cases, we have developed `spatialHeatmap` as a generic R/Bioconductor package for plotting quantitative values onto any type of spatially mapped images in a programmable environment and/or in an intuitive to use graphical user interface (GUI) application. For details, refer to the package [vignette](https://jianhaizhang.github.io/SVG_tutorial_file/vignette.html). 
 
 ## Tutorial Overview
 
-To plot spatial heatmaps, a pair of formatted data and aSVG (see [aSVG](#repo) below) image are required. The latter can come from the [EBI aSVG repository](#repo) or created by users. If the target aSVG image is not available in this repository, users should make a custom aSVG image. This tutorial explains the detailed process of making aSVG images. To reproduce the results in this tutorial, all the used files are available to [download](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download).   
+To plot spatial heatmaps, a pair of formatted data and aSVG (see [aSVG](#repo) below) image are required. The latter can come from the [aSVG repository](#repo) or created by users. If the target aSVG image is not available in this repository, users should make a custom aSVG image. This tutorial explains the detailed process of making aSVG images. To reproduce the results in this tutorial, all the used files are available to [download](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download).   
 
-This tutorial first introduces the [EBI aSVG repository](#repo). Second, three ways of making SVG shapes in [Inkscape](https://inkscape.org/) are presented. Third, the requirements on data format are explained. The *spatialHeatmap* package is able to work with EBI aSVGs directly. However, for the purpose of plotting spatial heatmaps there are unnecessary format requirements on these aSVGs, thus in the fourth section the simplified aSVG format is presented. The fifth section illustrates conversion from the simplified aSVG format to the advanced EBI aSVG format. If users make custom aSVGs only for their own use, the simplified format is recommended, since it is easier and time-saving. If they want to share with other EBI users they should follow the advanced format. Lastly, spatial heatmaps are demonstrated on the aSVG created in this tutorial.  
+This tutorial first introduces the [aSVG repository](#repo). Second, three ways of making SVG shapes in [Inkscape](https://inkscape.org/) are presented. Third, the requirements on data format are explained. The `spatialHeatmap` package is able to work with [EBI aSVGs](#repo) directly. However, for the purpose of plotting spatial heatmaps there are unnecessary format requirements on these aSVGs, thus in the fourth section the simplified aSVG format is presented. The fifth section illustrates conversion from the simplified aSVG format to the advanced EBI aSVG format. If users make custom aSVGs only for their own use, the simplified format is recommended, since it is easier and time-saving. If they want to share with other EBI users they should follow the advanced format. Lastly, spatial heatmaps are demonstrated on the aSVG created in this tutorial.  
 
 # Getting Started  
 
@@ -76,10 +76,20 @@ browseVignettes('spatialHeatmap')
 
 ```
 
+# aSVG Repository {#repo} 
 
-# EBI aSVG Repository {#repo} 
+To assign colors to specific features in spatial heatmaps, *annotated SVG* (aSVG) files are used where the shapes of interest are labeled according to certain conventions so that they can be addressed and colored programmatically. An aSVG repository, that can be used by `spatialHeatmap` directly, has been generated by the [EBI Gene Expression
+Group](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg). It
+contains annatomical aSVG images from different species. These SVG images are 
+also used by the Expression Atlas database. In addition, the `spatialHeatmap` has its own 
+repository called [spatialHeatmap aSVG Repository](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/svg_repo), where some aSVG files developed in this project are already deposited (e.g. [Figure 1](#shm)). 
 
-To assign colors to specific features in spatial heatmaps, *annotated SVG* (aSVG) files are used where the shapes of interest are labeled according to certain conventions so that they can be addressed and colored programmatically. The [EBI aSVG repository](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg) is a public repository and covers a wide range of organisms. These SVGs are well-annotated and can be used in *spatialHeatmap* directly. If there is no target aSVGs in this repository, the following sections should be followed to make custom aSVGs.    
+If users cannot find a target aSVG 
+in the two repositories, this step-by-step SVG
+tutorial for creating
+custom aSVG images is recommended. The [BAR eFP browser](http://bar.utoronto.ca/) at University of Toronto contains many anotomical images, and these images are good templates for making custom aSVGs.  
+
+We will add more aSVGs to our repository in the future and users are welcome to deposit their own aSVGs there to share with other `spatialHeatmap` users. 
 
 # Make SVG Images 
 
@@ -211,11 +221,11 @@ The `title` column includes 'samples' and 'conditions', so it is used to make th
 
 2. The sample column specifies sample replicates. It is crucial that replicate names of the same sample must be identical. Otherwise, they are treated as different samples. E.g. 'root_pGL2' and 'root_pCO2' in [Table 1](#tar_arab).  
 
-3. The sample identifiers of interest must be identical with features of interest in aSVG respectively. It means even a dot, undescore, space, etc can make a difference and lead to target features not colored in spatial heatmaps. Since double underscore (_\_) is a reserved separator in *spatialHeatmap*, it cannot be used in sample or condition identifiers.
+3. The sample identifiers of interest must be identical with features of interest in aSVG respectively. It means even a dot, undescore, space, etc can make a difference and lead to target features not colored in spatial heatmaps. Since double underscore (_\_) is a reserved separator in `spatialHeatmap`, it cannot be used in sample or condition identifiers.
 
 4. The condition column has the same requirement with the sample column. E.g. 'control' and 'hypoxia' in [Table 1](#tar_arab).  
 
-The completed targets file is packaged in *spatialHeatmap*, and is also downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (click the file, click "Raw", right click, and select "Save as…"). Selected rows are shown in [Table 1](#tar_arab).   
+The completed targets file is packaged in `spatialHeatmap`, and is also downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download) (click the file, click "Raw", right click, and select "Save as…"). Selected rows are shown in [Table 1](#tar_arab).   
 
 ```{r eval=TRUE, echo=TRUE, warnings=FALSE}
 tar.arab <- system.file('extdata/shinyApp/example/target_arab.txt', package='spatialHeatmap')
@@ -299,7 +309,17 @@ It is crucial that this container group must be the last element on the 'XML Edi
 
   <p/><center><img src="image/last_element.png" width="30%" hspace=10><img src="image/last_element1.png" width="30%"></center><p/>  
 
-By now, the simplified aSVG image is done. Save it as 'root_cross_simple.svg', which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the aSVG file name ends with `.svg` and the front should only consist of letters, digits, dots, or underscores. E.g. root_cross_simple(1).svg is not acceptable.   
+## Absolute Path Position {#abs}
+
+All the paths need to use absolute positions. To do so, click 'Preferences...' under 'Edit' tab. Go to 'Input/Output' → 'SVG Output' → 'Path data' → 'Path string format', and select 'Absolute'.  
+
+  <p/><center><img src="image/prefer.png" width="40%" hspace=10><img src="image/abs.png" width="40%" hspace=0></center><p/>  
+
+This setting only affects newly created paths. To trigger the effcts on existing paths, click 'Select All in All Layers' under the 'Edit' tab, and use the arrow key to nudge the selection, e.g. one step forward and one step backward. Then all the paths are rewritten and absolutely positioned. The absolut position is exemplified by the capital letters in the 'd' attribute of a path.  
+
+  <p/><center><img src="image/select_all.png" width="30%" hspace=10><img src="image/abs1.png" width="30%" hspace=0></center><p/>  
+
+By now, the simplified aSVG image is done. Save it as 'root_cross_simple.svg', which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the aSVG file name ends with '.svg' and the front should only consist of letters, digits, dots, or underscores. E.g. 'root_cross_simple(1).svg' is not acceptable.   
 
 # Advanced aSVG Format
 
@@ -359,15 +379,7 @@ Click 'Outline' in the layer panel, and draw an outline as explained [above](#dr
 
   <p/><center><img src="image/outline_layer.png" width="20%" hspace=10><img src="image/outline1.png" width="40%" hspace=10><img src="image/outline2.png" width="30%" hspace=0></center><p/>  
 
-## Absolute Path Position
-
-All the paths need to use absolute positions. To do so, click 'Preferences...' under 'Edit' tab. Go to 'Input/Output' → 'SVG Output' → 'Path data' → 'Path string format', and select 'Absolute'.  
-
-  <p/><center><img src="image/prefer.png" width="40%" hspace=10><img src="image/abs.png" width="40%" hspace=0></center><p/>  
-
-This setting only affects newly created paths. To trigger the effcts on existing paths, click 'Select All in All Layers' under the 'Edit' tab, and use the arrow key to nudge the selection, e.g. one step forward and one step backward. Then all the paths are rewritten and absolutely positioned. The absolut position is exemplified by the capital letters in the 'd' attribute of a path.  
-
-  <p/><center><img src="image/select_all.png" width="30%" hspace=10><img src="image/abs1.png" width="30%" hspace=0></center><p/>  
+Make sure all paths have absolute coordinates as shown in Section [Absolute Path Position](#abs).  
 
 ## Resize Page
 
@@ -393,6 +405,7 @@ svg.root <- system.file('extdata/shinyApp/example/arabidopsis_thaliana.root_cros
 
 Plot spatial heatmaps on gene `HRE2`. In Figure 1, it is manifest that gene `HRE2` is showing higher expression level in `hypoxia` than in `control`, and thus might play an interesting role in hypoxia resistance.     
 
+<a name='shm'></a>
 ```{r eval=TRUE, echo=TRUE, warnings=FALSE, fig.align="center", fig.cap=('Figure 1 Spatial Heatmaps. The matching tissues between data and aSVG are colored in the middle spatial heatmaps. On the right is the legend plot, where matching tissues are labeled.'), out.width="100%"}
 spatial_hm(svg.path=svg.root, data=se.fil.arab, sam.factor='samples', con.factor='conditions', ID=c("HRE2"), height=0.4, legend.nrow=3, legend.r=1.3, legend.key.size=0.3)
 ```
