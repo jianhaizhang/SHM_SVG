@@ -82,7 +82,7 @@ To assign colors to specific features in spatial heatmaps, *annotated SVG* (aSVG
 Group](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg). It
 contains annatomical aSVG images from different species. These SVG images are 
 also used by the Expression Atlas database. In addition, the `spatialHeatmap` has its own 
-repository called [spatialHeatmap aSVG Repository](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/svg_repo), where some aSVG files developed in this project are already deposited (e.g. [Figure 1](#shm)). 
+repository called [spatialHeatmap aSVG Repository](https://github.com/jianhaizhang/spatialHeatmap_aSVG_Repository), where some aSVG files developed in this project are already deposited (e.g. [Figure 1](#shm)). 
 
 If users cannot find a target aSVG 
 in the two repositories, this step-by-step SVG
@@ -293,6 +293,11 @@ Under the 'Edit' tab on the top, select 'XML Editor...'. Click the group to sele
 
   <p/><center><img src="image/edit.png" width="30%" hspace=10><img src="image/xml_tab.png" width="30%" hspace=10><img src="image/set_id.png" width="30%"></center><p/>  
 
+It is optional to add an 'ontology' attribute to the tissue. Retrieve the ontology id for 'root atrichoblast epidermis' (root_pGL2) at [Ontology Lookup Service](https://www.ebi.ac.uk/ols/index). Click the tissue in the XML Editor, type in 'ontology' and the retreived id in front of and below 'Set' respectively, and click 'Set', then the 'ontology' attribute is assigned.  
+
+  <p/><center><img src="image/sim_ont.png" width="30%" hspace=10><img src="image/sim_ont1.png" width="30%" hspace=0></center><p/>  
+
+
 Similarly, group and set id for `root_pCO2`, `root_pSCR`, `root_pWOL` respectively. When group the small vasculature shapes in the center, a shortcut is to draw a rectangle over them to select all rather than clicking each individually. Note if a tissue sample contains only one shape, there is no need to group it, but the id should be identical with corresponding sample in the data in order to be colored in spatial heatmaps.  
 
   <p/><center><img src="image/final.png" width="30%"></center><p/>
@@ -364,6 +369,7 @@ Set title id as `root_pSCR`, then the title is done.
 
   <p/><center><img src="image/title_id.png" width="30%" hspace=10><img src="image/title_done.png" width="30%" hspace=0></center><p/>  
 
+<a name='ols'></a>
 Look up for 'root endodermis' that `root_pSCR` stands for in [Ontology Lookup Service](https://www.ebi.ac.uk/ols/index), and set the `root_pSCR` group id as `PO:0005059`. Then the annotation of `root_pSCR` is done.   
 
   <p/><center><img src="image/ont.png" width="50%" hspace=10><img src="image/ont1.png" width="30%" hspace=0></center><p/>  
