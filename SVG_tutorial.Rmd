@@ -320,9 +320,11 @@ All the paths need to use absolute positions. To do so, click 'Preferences...' u
 
   <p/><center><img src="image/prefer.png" width="40%" hspace=10><img src="image/abs.png" width="40%" hspace=0></center><p/>  
 
-This setting only affects newly created paths. To trigger the effcts on existing paths, click 'Select All in All Layers' under the 'Edit' tab, and use the arrow key to nudge the selection, e.g. one step forward and one step backward. Then all the paths are rewritten and absolutely positioned. The absolut position is exemplified by the capital letters in the 'd' attribute of a path.  
+This setting only affects newly created paths. To trigger the effcts on existing paths, click 'Select All in All Layers' under the 'Edit' tab, and use the arrow key to nudge the selection, e.g. one step forward and one step backward. Then all the paths are rewritten and absolutely positioned. The absolut position is indicated by the capital letters in the 'd' attribute of a path.  
 
   <p/><center><img src="image/select_all.png" width="30%" hspace=10><img src="image/abs1.png" width="30%" hspace=0></center><p/>  
+
+Next, make sure the canvas are resized as shown in Section [Resize Canvas](#resize).    
 
 By now, the simplified aSVG image is done. Save it as 'root_cross_simple.svg', which is downloadable [here](https://github.com/jianhaizhang/SVG_tutorial_file/tree/master/download). Note: the aSVG file name ends with '.svg' and the front should only consist of letters, digits, dots, or underscores. E.g. 'root_cross_simple(1).svg' is not acceptable.   
 
@@ -387,9 +389,9 @@ Click 'Outline' in the layer panel, and draw an outline as explained [above](#dr
 
 Make sure all paths have absolute coordinates as shown in Section [Absolute Path Position](#abs).  
 
-## Resize Page
+## Resize Canvas {#resize}
 
-To ensure that the correct height and width are set, go to 'Document Properties...' under 'File ' tab, and select 'Custom size' under 'Page' tab, then set 'Units' to 'px' and click on 'Resize page to drawing or selection'.  
+To ensure correct height and width, go to 'Document Properties...' under 'File ' tab, and select 'Custom size' under 'Page' tab, then set 'Units' to 'px' and click on 'Resize page to drawing or selection'.  
 
   <p/><center><img src="image/property.png" width="30%" hspace=10><img src="image/property1.png" width="40%" hspace=0></center><p/>  
 
