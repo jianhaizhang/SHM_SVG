@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+              xmlns:dc="http://purl.org/dc/elements/1.1/"
+              xmlns:cc="http://creativecommons.org/ns#"
+              xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+              xmlns:svg="http://www.w3.org/2000/svg"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+              xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+              width="136.8109"
+              height="131.06259"
+              viewBox="0 0 136.8109 131.06259"
+              preserveAspectRatio="none"
+              id="svg2"
+              version="1.1"
+              inkscape:version="0.92.3 (unknown)"
+              sodipodi:docname="sorghum_bicolor.flower_parts.svg">
+             <defs
+                           id="defs4" />
+             <sodipodi:namedview
+                           id="base"
+                           pagecolor="#ffffff"
+                           bordercolor="#666666"
+                           borderopacity="1.0"
+                           inkscape:pageopacity="0.0"
+                           inkscape:pageshadow="2"
+                           inkscape:zoom="63.356767"
+                           inkscape:cx="75.72626"
+                           inkscape:cy="74.834952"
+                           inkscape:document-units="px"
+                           inkscape:current-layer="LAYER_OUTLINE"
+                           showgrid="false"
+                           inkscape:window-width="1855"
+                           inkscape:window-height="1056"
+                           inkscape:window-x="65"
+                           inkscape:window-y="24"
+                           inkscape:window-maximized="1"
+                           fit-margin-top="0"
+                           fit-margin-left="0"
+                           fit-margin-right="0"
+                           fit-margin-bottom="0"
+                           units="px" />
+             <metadata
+                           id="metadata">
+                          <rdf:RDF>
+                                       <cc:Work
+                                                     rdf:about="">
+                                                    <dc:format>image/svg+xml</dc:format>
+                                                    <dc:type
+                                                                  rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                                                    <dc:title></dc:title>
+                                       </cc:Work>
+                          </rdf:RDF>
+             </metadata>
+             <g
+                           id="LAYER_OUTLINE"
+                           inkscape:groupmode="layer"
+                           inkscape:label="Outline">
+                          <path
+                                        style="fill:#a025a2;fill-opacity:1;stroke:#000000;stroke-opacity:1"
+                                        d="M 74.168351,55.159292 C 74.168351,55.146292 74.168351,55.159292 74.168351,55.172292 74.168351,55.187292 74.168351,55.191292 74.168351,55.185292 74.168351,55.172292 74.168351,55.165292 74.168351,55.158292 Z"
+                                        id="path1804"
+                                        inkscape:connector-curvature="0" />
+                          <path
+                                        style="fill:#a0a1a2;fill-opacity:1;stroke:#000000;stroke-opacity:1"
+                                        d="M 77.167786,56.747913 C 77.194786,56.722913 77.194786,56.641413 77.167786,56.594913 77.122786,56.521913 77.058986,56.567913 77.058986,56.673913 77.058986,56.718913 77.058986,56.725913 77.094986,56.745913 77.137986,56.771913 77.143986,56.772913 77.168986,56.745913 Z"
+                                        id="path1802"
+                                        inkscape:connector-curvature="0" />
+             </g>
+</svg>

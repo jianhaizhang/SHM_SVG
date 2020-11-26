@@ -77,7 +77,7 @@ svg <- list.files(path='/home/jzhan067/SVG_tutorial_file/anatomogram/src/svg/', 
 svg1 <- list.files(path='/home/jzhan067/SVG_tutorial_file/svg_repo/ebi_trans', pattern='.svg$', full.names=T)
 path.out <- '~/test/'
 
-# Map ids/ontologys from SVGs resulting from svg.edit to these after maual adjustment. 
+# Map ids/ontologys from SVGs resulting from svg.edit to these after manual adjustment. 
 id.ont <- NULL; for (path.in in svg1) {
 
   doc <- read_xml(path.in); chdn <- xml_children(doc)
@@ -170,6 +170,57 @@ library(xml2)
 update_feature(feature=ft2, dir='~/test1')
 
 
+
+# Replace a node with another node
+
+# parent The outline or tissue layer
+# idx The order of target node to replace in parent
+# ref The node to replace target node
+# id The target node id
+# trans The target node tranform
+# title The target node title/id
+rpl_node <- function(parent, idx, ref, id, trans, title) {
+  nod <- xml_children(parent)[[idx]]
+  cat('Updating "use" element', id, '... \n')
+  xml_replace(nod, ref, .copy = TRUE)
+  nod <- xml_children(parent)[[idx]]; xml_set_attr(nod, 'id', id)
+  if (!is.na(trans)) xml_set_attr(nod, 'transform', trans)
+  # xml_attrs(nod) <- NULL
+  # for (j in seq_along(attrs)) { if (names(attrs[j])=='href') next; xml_set_attr(nod, names(attrs[j]), attrs[j]) }
+  cld <- xml_children(nod); tit <- cld[xml_name(cld)=='title']
+  if (length(tit)>0) xml_text(tit) <- xml_attr(tit, 'id') <- title       
+}
+
+
+# Replace each use node with corresponding reference node. Must start from "read_xml" and before "path_br_all". Since after replaced, the new node could have unexpected shape due to "transform" in the reference and/or possibly in use node, this strategy is not used. The alternative is only keep the reference and use nodes in doc, and extract the portion for use node in ps.xml.
+
+# chdn.all A list of all children in outline and tissue layers
+# id.all All ids of chdn.all
+# parent The outline or tissue layer
+# chdn All children of outline or tissue layer.
+update_use <- function(chdn.all, id.all, parent, chdn) {
+
+  na <- xml_name(chdn)
+  w <- which(na=='use'); if (length(w)==0) return()
+  for (i in w) {
+    # Search for the reference node for each use node.
+    nod <- chdn[[i]]; id <- xml_attr(nod, 'id'); ref <- xml_attr(nod, 'href'); trans <- xml_attr(nod, 'transform'); ft <- tit_id(nod)
+    nod.ref <- chdn.all[which(paste0('#', id.all) %in% ref)]
+    if (length(nod.ref)>0) { # The reference is not in a group.
+      rpl_node(parent, i, nod.ref[[1]], id, trans, ft)
+     } else { # The reference is in a group.
+       g <- chdn.all[na.all=='g']; if (length(g)==0) return()
+       for (k in seq_along(g)) { # Search for the reference node in each group.
+         g0 <- g[[k]]; cld.g <- xml_children(g0)
+         w <- which(paste0('#', xml_attr(cld.g, 'id')) %in% ref)
+         if (sum(w)==0) next; nod.ref <- cld.g[[w[1]]]
+         rpl_node(parent, i, nod.ref, id, trans, ft)
+       }
+     }
+  }
+}
+
+# update_use(chdn.all, id.all, ply, chdn.ply)
 
 
 
