@@ -181,6 +181,13 @@ Use 'Ctrl+A' to select all shapes. Click 'No paint' under 'Fill' tab on the fill
 
   <p/><center><img src="image/no_paint.png" width="30%" hspace=10><img src="image/blank.png" width="30%"></center><p/>  
 
+## Base Shape and Structral Shape
+
+If the SVG image comprises numerous shapes, the speed of creating SHMs will be compromised in `spatialHeatmap`. To maintain acceptable runtime, the strategy of overlaying a large base shape with structral shapes are recommended. Specifically, the base shape is the overal outline of many tissues, and the structral shapes are intersected shapes or lines to define the borders between individual tissues. This technique will save a large number of coordinates and thus reduce runtime significantly.      
+
+  <p/><center><img src="image/many_shape.png" width="30%" hspace=10><img src="image/two_layer.png" width="30%"></center><p/>  
+
+
 # Format the Data
 
 The bridges between data and aSVG are the samples/features. Only features having matching counterparts between data and aSVG are colored in the spatial heatmaps. Therefore, the formatting process of SVG image is in accordance with the data formatting. The accepted data classes include `vector`, `data frame`, or `SummarizedExperiment` (SE) [@SummarizedExperiment]. Formatting the data is essentially to define samples and/or conditions. In the following, data formatting is explained on SE, since this data class is widely used in biological omics analysis. Details on `vector` and `data frame` are presented in [Supplement](#data).  
@@ -334,9 +341,9 @@ It is crucial that this container group must be the last element on the 'XML Edi
 
   <p/><center><img src="image/last_element.png" width="30%" hspace=10><img src="image/last_element1.png" width="30%"></center><p/>  
 
-## Text Group 
+## Text Group and Legend Path 
 
-If the image needs labels, text can be added. First click "Create and edit text objects (F8)" on the left tool bar. Click the target position and type text, here "root_pGL2". The the text object is created.  
+Text and legend can be added to the SVG image, which is optional. To include text, first click "Create and edit text objects (F8)" on the left tool bar. Click the target position and type text, here "root_pGL2". The the text object is created.  
 
   <p/><center><img src="image/text_tool.png" width="30%" hspace=10><img src="image/type.png" width="30%"></center><p/>  
 
@@ -348,10 +355,15 @@ Select the text object and convert it to path.
   
   <p/><center><img src="image/object2path.png" width="30%" hspace=10></center><p/>  
 
-Now the text is a group (`g`). If the text group is not inside the container group, click "Indent node" on the XML editor to move it into the container. Note the text group id must starts with `text` such as `text927`.     
+Now the text is a group (`g`). If the text group is not inside the container group, click "Indent node" on the XML editor to move it into the container.   
 
-  <p/><center><img src="image/indent_text.png" width="30%" hspace=10><img src="image/text_id.png" width="30%"></center><p/>  
+The text group id must starts with `text` as prefix and end with `_LGD` as suffix such as `text927_LGD`. The `_LGD` ensures the text color (black) is preserved in all SHMs, so if missing, the text will be transparent.    
 
+  <p/><center><img src="image/indent_text.png" width="30%" hspace=10><img src="image/text_id.png" width="30%" vspace=10><img src="image/text_LGD.png" width="60%"></center><p/>  
+
+If other legend paths are included, the path ids must also have the `_LGD` as suffix such as `rect161_LGD`. Otherwise, the legend will be transparent in all SHMs. In addition, the legend paths should also be included in the large container group.   
+
+  <p/><center><img src="image/LGD.png" width="60%"></center><p/>  
 
 ## Absolute Path Position {#abs}
 
