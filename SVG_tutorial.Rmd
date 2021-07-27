@@ -288,7 +288,7 @@ There are two aSVG formats that `spatialHeatmap` accepts: SHM format and [EBI fo
 
 2. If a tissue is expected to be colored in the spatial heatmaps, its `id` value must have an identical tissue counterpart in the data/targets file. It means even a difference of dot, space, underscore, uppercase, or lowercase matters. If a tissue is a group, the group `id` counts while ids of inside paths are useless.  
 
-3. In the end, all the tissues (groups and single paths) must be grouped together as a container group, and this large group must be the last element in the 'XML Editor'.  
+3. In the end, all tissues and legends (groups and single paths) must be grouped together as a container group, and this large group must be the last element in the 'XML Editor'.  
 
 
 ## Group Same Tissues
@@ -304,7 +304,7 @@ Click 'Flat color' under the 'Fill' tab on the fill and stroke panel, and fill t
 
 ## Resize Groups
 
-A group (e.g. root_pSCR) could be resized by simply dragging the black arrows on the edge or changing the width (H), height (H) values on the top toolbar. On either case, in the "XML Editor" panel the resized group would have an attribute of `transform` with a value of `matrix`, which means the coordinates of this group are transformed because of resizing.   
+A group (e.g. root_pSCR) could be resized by simply dragging the black arrows on the edge or changing the width (H), height (H) values on the top toolbar. In either case, in the "XML Editor" panel the resized group would have an attribute of `transform` with a value of `matrix`, which means the coordinates of this group are transformed because of resizing.   
 
   <p/><center><img src="image/drag1.png" width="30%" hspace=10><img src="image/drag2.png" width="30%"></center><p/>  
   <p/><center><img src="image/width1.png" width="30%" hspace=10><img src="image/width2.png" width="30%"></center><p/>
@@ -331,15 +331,6 @@ Similarly, group and set id for `root_pCO2`, `root_pSCR`, `root_pWOL` respective
 
 Brown, blue, orange, purple labels `root_pGL2`, `root_pCO2`, `root_pSCR`, `root_pWOL` respectively. The blank shapes have random ids and will not be colored in the spatial heatmap.   
 
-## Container Group
-  
-At last, it is required to group all tissues (groups and independent paths) as a container group. To do so, use 'Ctrl+A' to select all, mouse over the selection, right click, and click group. Note it is optional to set a specific `id` for this container group.  
-
-  <p/><center><img src="image/group_all.png" width="30%" hspace=10><img src="image/set_container.png" width="30%"><p/>  
-
-It is crucial that this container group must be the last element on the 'XML Editor'.   
-
-  <p/><center><img src="image/last_element.png" width="30%" hspace=10><img src="image/last_element1.png" width="30%"></center><p/>  
 
 ## Text Group and Legend Path 
 
@@ -351,21 +342,28 @@ To edit text, click "View and select font family, font size, and other text prop
 
   <p/><center><img src="image/text_tool1.png" width="30%" hspace=10><img src="image/font.png" width="30%"></center><p/>  
 
-Select the text object and convert it to path.  
-  
-  <p/><center><img src="image/object2path.png" width="30%" hspace=10></center><p/>  
+Select the text object and convert it to path, then the text is a group (g).     
 
-Now the text is a group (g). If the text group is not inside the container group, click "Indent node" on the XML editor to move it into the container.   
-  
-  <p/><center><img src="image/indent_text.png" width="35%" hspace=10><img src="image/indent_text1.png" width="25%"></center><p/>  
+  <p/><center><img src="image/object2path.png" width="35%" hspace=10><img src="image/indent_text1.png" width="25%"></center><p/>  
 
 The text group id must have specific prefix and suffix so as to retain desired output in final SHMs. Specifically, the prefix should be `text`, otherwise the letters in SHMs might be distorted. The suffix should be `_localLGD` or `_globalLGD`, otherwise the text color (black) will be missing and the text will be transparent. If `_localLGD`, the text will only be present in the legend image ([Figure 1](#shm) right) while if `_globalLGD` the text will be present in the main SHMs ([Figure 1](#shm) middle) and legend image. An example text group id is `text927_globalLGD`.     
 
   <p/><center><img src="image/text_LGD.png" width="70%"></center><p/>  
 
-If non-text legends are included, the path ids only need to have the suffix `_localLGD` or `_globalLGD` such as `rect161_globalLGD`. Without the suffix, the legend will be transparent in SHMs. In addition, the legend paths should also be included in the large container group.   
+If non-text legends are included, the path ids only need to have the suffix `_localLGD` or `_globalLGD` such as `rect161_globalLGD`. Without the suffix, the legend will be transparent in SHMs.   
 
   <p/><center><img src="image/global_legend.png" width="75%"></center><p/>  
+
+## Container Group
+  
+At last, it is required to group all tissues and legends (groups and independent paths) as an overall container group. If they are not grouped yet, use 'Ctrl+A' to select all, mouse over the selection, right click, and click group, then the container group is done.   
+
+  <p/><center><img src="image/group_all.png" width="30%" hspace=10><img src="image/set_container.png" width="30%"><p/>   
+
+
+Note the container group `id` is set as `container`, but it is optional. It is crucial that this container group must be the last element on the 'XML Editor'.   
+
+  <p/><center><img src="image/last_element.png" width="30%" hspace=10><img src="image/last_element1.png" width="25%"></center><p/>  
 
 ## Absolute Path Position {#abs}
 
