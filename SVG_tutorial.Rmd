@@ -182,7 +182,7 @@ If the SVG image includes numerous spatial features (Figure \@ref(fig:shapeLayer
 include_graphics('image/shape_layer.jpg')
 ```
 
-# Formatting SVGs {formatSVG}
+# Formatting SVGs {#formatSVG}
 
 For plotting SHMs with *spatialHeatmap*, the spatial features in the SVGs should be formatted according to some conventions. This section focuses on the details of formatting SVGs. In addition, SVGs from [EBI Anatomogram](https://github.com/ebi-gene-expression-group/anatomogram/tree/master/src/svg){target="_blank"} are also supported in *spatialHeatmap*.   
 
@@ -289,7 +289,7 @@ include_graphics('image/canvas.jpg')
 
 In *spatialHeatmap*, the naming convention for the aSVG file follows the pattern "\<species\>_[view]_shm.svg," for example, "arabidopsis.thaliana_root.cross_shm.svg." It's important to note that the aSVG file name must end with ".svg," and the beginning of the file name should only include letters, digits, dots, or underscores. Parentheses should be avoided. For instance, a name like "arabidopsis.thaliana_root.cross_shm(1).svg" is not supported.
 
-# Formatting the Data {formatData}
+# Formatting the Data {#formatData}
 
 When plotting SHMs, only spatial features that have common identifiers between the aSVG and assay data are colored. As a result, it's crucial to format the assay data. The supported data containers include `vector`, `data frame`, and `SummarizedExperiment` (SE) [@SummarizedExperiment]. This section focuses on `SE`. Details of the other two data containers are provided in the *spatialHeatmap* [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/spatialHeatmap/inst/doc/spatialHeatmap.html#61_Numeric_Data){target='_blank'}.   
 
