@@ -1,6 +1,6 @@
 # spatialHeatmap aSVG Repository
 
-This SVG repository is used to deposit annotated SVGs (aSVGs) made by the [spatialHeatmap](https://bioconductor.org/packages/devel/bioc/html/spatialHeatmap.html){:target='_blank'} users. The instructions for creating custom aSVGs are provided in the [SVG tutorial](https://jianhaizhang.github.io/SVG_tutorial){:target='_blank'}.  
+This SVG repository is used to deposit annotated SVGs (aSVGs) made by the [spatialHeatmap](https://bioconductor.org/packages/devel/bioc/html/spatialHeatmap.html){:target='_blank' rel="noopener"} users. The instructions for creating custom aSVGs are provided in the [SVG tutorial](https://jianhaizhang.github.io/SVG_tutorial){:target='_blank' rel="noopener"}.  
 
 Guidelines to deposit aSVGs:
  
