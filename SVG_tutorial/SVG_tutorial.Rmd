@@ -255,9 +255,14 @@ The [id](#ann) of a text group must have specific prefixes and suffixes to achie
 include_graphics('image/text_LGD.png')
 ```
 
-If non-text shapes are included as legends, their ids only need to have the suffix "_localLGD" or "_globalLGD" such as "rect161_globalLGD". Without these suffixes, the legend may appear transparent in SHMs.   
+## Shapes with Fixed Colors  
 
-```{r lgd, echo=FALSE, fig.wide=TRUE, out.width="100%", fig.cap=("Non-text legends.")} 
+If non-text shapes, such as legends with fixed colors, are included, their ids only need to have the following suffixes. Without these suffixes, the legend may appear transparent in SHMs.  
+
+* "_localLGD": keeps the shapes visible only in SHMs;  
+* "_globalLGD": keeps the shapes visible in both SHMs and the legend plot, such as "rect161_globalLGD".   
+
+```{r lgd, echo=FALSE, fig.wide=TRUE, out.width="100%", fig.cap=("Non-text shapes.")} 
 include_graphics('image/global_legend.png')
 ```
 
